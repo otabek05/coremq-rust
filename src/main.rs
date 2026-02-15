@@ -5,6 +5,7 @@ mod models;
 mod enums;
 mod brokers;
 mod engine;
+mod utils;
 
 use std::sync::Arc;
 

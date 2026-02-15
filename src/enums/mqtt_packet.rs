@@ -1,5 +1,4 @@
 
-
 #[derive(Clone, Copy, PartialEq, Eq, Debug )]
 pub enum MqttPacketType {
     Connect = 1,
