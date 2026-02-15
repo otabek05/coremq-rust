@@ -28,6 +28,7 @@ pub fn read_string(buf: &mut BytesMut) -> Option<String> {
     if buf.len() < 2 + len {
         return None;
     }
+    
     buf.advance(2);
     let s = String::from_utf8(buf.split_to(len).to_vec()).ok()?;
     Some(s)
