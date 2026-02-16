@@ -1,3 +1,5 @@
+use std::time::SystemTime;
+
 use bytes::{Buf, BytesMut};
 
 use crate::{
@@ -9,6 +11,9 @@ use crate::{
 pub struct ConnectPacket {
     pub client_id: String,
     pub keep_alive: u16,
+    pub clean_session: bool,
+    pub username: Option<String>,
+    pub password: Option<String>,
 }
 
 #[derive(Debug, Clone)]
@@ -25,6 +30,7 @@ pub struct SubscribePacket {
     pub packet_id: u16,
     pub topic: String,
     pub qos: u8,
+    pub subscribed_at: SystemTime
 }
 
 pub enum MqttPacket {
@@ -42,13 +48,15 @@ impl MqttPacket {
             return None;
         }
 
+        println!("request reseived: {:?}", header.packet_type);
+
         let mut packet_buf = buf.split_to(header.remaining_length);
         match header.packet_type {
             MqttPacketType::Connect => parse_connect(&mut packet_buf),
-            MqttPacketType::Publish => parse_publish(header.flags, buf),
-            MqttPacketType::Subscribe => parse_subscribe(buf),
+            MqttPacketType::Publish => parse_publish(header.flags, &mut packet_buf),
+            MqttPacketType::Subscribe => parse_subscribe(&mut packet_buf),
              MqttPacketType::PingReq => Some(MqttPacket::PingReq),
-        MqttPacketType::Disconnect => Some(MqttPacket::Disconnect),
+            MqttPacketType::Disconnect => Some(MqttPacket::Disconnect),
         _ => None,
 
         }
@@ -58,13 +66,33 @@ impl MqttPacket {
 fn parse_connect(buf: &mut BytesMut) -> Option<MqttPacket> {
     let protocol_name = read_string(buf)?;
     buf.advance(1);
-    let _connect_flag = buf.get_u8();
+    let connect_flags = buf.get_u8();
     let keep_alive = buf.get_u16();
     let client_id = read_string(buf)?;
+
+    let clean_session = (connect_flags & 0b0000_0010) != 0;
+    let username_flag = (connect_flags & 0b1000_0000) != 0;
+    let password_flag = (connect_flags & 0b0100_0000) != 0;
+
+    let username = if username_flag {
+        Some(read_string(buf)?)
+    } else {
+        None
+    };
+
+    let password = if password_flag {
+        Some(read_string(buf)?)
+    } else {
+        None
+    };
 
     Some(MqttPacket::Connect(ConnectPacket {
         client_id,
         keep_alive,
+        clean_session,
+        username,
+        password
+
     }))
 }
 
@@ -103,5 +131,7 @@ fn parse_subscribe(buf: &mut BytesMut) -> Option<MqttPacket> {
         packet_id,
         topic,
         qos,
+        subscribed_at: SystemTime::now()
     }))
+
 }

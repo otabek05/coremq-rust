@@ -1,6 +1,6 @@
 use bytes::{Buf, BytesMut};
 
-use crate::{broker::parser::read_remaining_length, enums::mqtt_packet::MqttPacketType};
+use crate::{enums::mqtt_packet::MqttPacketType};
 
 
 
@@ -21,7 +21,7 @@ impl  FixedHeader  {
         let flags = byte1 & 0x0F;
         let packet_type = MqttPacketType::from_u8(packet_type_raw)?;
         buf.advance(1);
-        let remaining_length = read_remaining_length(buf)?;
+        let remaining_length = Self::read_remaining_length(buf)?;
         Some(FixedHeader { packet_type, flags, remaining_length })
     }
 
