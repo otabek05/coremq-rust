@@ -1,6 +1,3 @@
-
-mod broker;
-mod conn_handler;
 mod models;
 mod enums;
 mod brokers;
@@ -8,7 +5,7 @@ mod engine;
 mod utils;
 
 use tokio::{net::TcpListener};
-use crate::brokers::broker::Broker;
+use crate::brokers::tcp_broker::TcpBroker;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -22,7 +19,7 @@ async fn main() -> anyhow::Result<()> {
         println!("MQTT broker running on {}", addr);
 
         // Broker should be Arc<Broker>
-        let broker = Broker::new(
+        let broker = TcpBroker::new(
             main_engine.clients.clone(),
             main_engine.topic_tree.clone(),
         );

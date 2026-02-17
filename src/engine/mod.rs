@@ -1,12 +1,12 @@
-use std::{collections::{HashMap, HashSet}, sync::Arc};
+use std::{collections::{HashMap}, sync::Arc};
 use tokio::sync::{Mutex, RwLock};
-use crate::{brokers::broker::{Broker, ClientID, Topic}, models::{client::{ Session}, topic::TopicNode}};
+use crate::{brokers::tcp_broker::{TcpBroker, ClientID}, models::{client::{ Session}, topic::TopicNode}};
 
 #[derive(Clone,Debug)]
 pub struct Engine {
-  pub  clients: Arc<Mutex<HashMap<ClientID, Session>>>,
+  pub clients: Arc<Mutex<HashMap<ClientID, Session>>>,
   pub topic_tree: Arc<RwLock<TopicNode>>,
-  pub  brokers: Arc<Mutex<Vec<Broker>>>
+  pub brokers: Arc<Mutex<Vec<TcpBroker>>>
 }
 
 impl Engine {

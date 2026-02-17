@@ -1,8 +1,5 @@
 use bytes::BytesMut;
-use std::{
-    collections::{HashMap, HashSet},
-    sync::Arc,
-};
+use std::{ collections::{HashMap, HashSet},sync::Arc,};
 use tokio::{
     io::{AsyncReadExt, AsyncWriteExt},
     net::TcpStream,
@@ -10,10 +7,7 @@ use tokio::{
 };
 
 use crate::{
-    models::{
-        client::Session,
-        topic::TopicNode,
-    },
+    models::{ client::Session,topic::TopicNode,},
     utils::mqtt_packet::{
         MqttPacket,
         PublishPacket,
@@ -23,15 +17,14 @@ use crate::{
 };
 
 pub type ClientID = String;
-pub type Topic = String;
 
 #[derive(Clone, Debug)]
-pub struct Broker {
+pub struct TcpBroker {
     clients: Arc<Mutex<HashMap<ClientID, Session>>>,
     topic_tree: Arc<RwLock<TopicNode>>,
 }
 
-impl Broker {
+impl TcpBroker {
     pub fn new(
         clients: Arc<Mutex<HashMap<ClientID, Session>>>,
         topic_tree: Arc<RwLock<TopicNode>>,
@@ -71,7 +64,6 @@ impl Broker {
         if let Some(client_id) = current_client_id {
             let mut clients = self.clients.lock().await;
             clients.remove(&client_id);
-            println!("client {} disconnected", client_id);
         }
 
         Ok(())
@@ -104,7 +96,9 @@ impl Broker {
                 socket.write_all(&[0xD0, 0x00]).await?;
             }
 
-            _ => {}
+            _ => {
+                println!("didnt match none of them")
+            }
         }
 
         Ok(())
@@ -117,7 +111,6 @@ impl Broker {
         tx: &mpsc::Sender<PublishPacket>,
         current_client_id: &mut Option<String>,
     ) -> anyhow::Result<()> {
-
         let client_id = p.client_id.clone();
         *current_client_id = Some(client_id.clone());
 
@@ -140,10 +133,7 @@ impl Broker {
         }
 
         println!("client connected: {}", client_id);
-
-        // CONNACK (success)
         socket.write_all(&[0x20, 0x02, 0x00, 0x00]).await?;
-
         Ok(())
     }
 

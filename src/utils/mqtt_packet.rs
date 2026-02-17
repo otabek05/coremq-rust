@@ -3,7 +3,7 @@ use std::time::SystemTime;
 use bytes::{Buf, BytesMut};
 
 use crate::{
-    broker::parser::read_string, enums::mqtt_packet::MqttPacketType,
+    enums::mqtt_packet::MqttPacketType,
     utils::fixed_header::FixedHeader,
 };
 
@@ -55,17 +55,27 @@ impl MqttPacket {
             MqttPacketType::Connect => parse_connect(&mut packet_buf),
             MqttPacketType::Publish => parse_publish(header.flags, &mut packet_buf),
             MqttPacketType::Subscribe => parse_subscribe(&mut packet_buf),
-             MqttPacketType::PingReq => Some(MqttPacket::PingReq),
+            MqttPacketType::PingReq => Some(MqttPacket::PingReq),
             MqttPacketType::Disconnect => Some(MqttPacket::Disconnect),
         _ => None,
 
         }
     }
+
 }
+
 
 fn parse_connect(buf: &mut BytesMut) -> Option<MqttPacket> {
     let protocol_name = read_string(buf)?;
-    buf.advance(1);
+    if protocol_name != "MQTT" {
+        return None;
+    }
+
+    let protocol_level = buf.get_u8();
+    if protocol_level != 4 {
+        return None;
+    }
+
     let connect_flags = buf.get_u8();
     let keep_alive = buf.get_u16();
     let client_id = read_string(buf)?;
@@ -91,8 +101,7 @@ fn parse_connect(buf: &mut BytesMut) -> Option<MqttPacket> {
         keep_alive,
         clean_session,
         username,
-        password
-
+        password,
     }))
 }
 
@@ -134,4 +143,20 @@ fn parse_subscribe(buf: &mut BytesMut) -> Option<MqttPacket> {
         subscribed_at: SystemTime::now()
     }))
 
+}
+
+
+
+ fn read_string(buf: &mut BytesMut) -> Option<String> {
+    if buf.len() < 2 {
+        return None;
+    }
+    let len = u16::from_be_bytes([buf[0], buf[1]]) as usize;
+    if buf.len() < 2 + len {
+        return None;
+    }
+    
+    buf.advance(2);
+    let s = String::from_utf8(buf.split_to(len).to_vec()).ok()?;
+    Some(s)
 }

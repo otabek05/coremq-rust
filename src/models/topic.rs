@@ -2,8 +2,7 @@
 
 use std::collections::{HashMap, HashSet};
 
-pub type ClientID = String;
-pub type Topic = String;
+use crate::brokers::tcp_broker::ClientID;
 
 #[derive(Debug, Default)]
 pub struct TopicNode {
