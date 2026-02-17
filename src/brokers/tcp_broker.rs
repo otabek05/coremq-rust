@@ -113,7 +113,6 @@ impl TcpBroker {
     ) -> anyhow::Result<()> {
         let client_id = p.client_id.clone();
         *current_client_id = Some(client_id.clone());
-
         let session = Session::new(
             client_id.clone(),
             p.username.unwrap_or_default(),

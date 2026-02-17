@@ -48,8 +48,6 @@ impl MqttPacket {
             return None;
         }
 
-        println!("request reseived: {:?}", header.packet_type);
-
         let mut packet_buf = buf.split_to(header.remaining_length);
         match header.packet_type {
             MqttPacketType::Connect => parse_connect(&mut packet_buf),
