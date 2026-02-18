@@ -2,48 +2,21 @@ use std::time::SystemTime;
 
 use bytes::{Buf, BytesMut};
 
-use crate::{
-    enums::mqtt_packet::MqttPacketType,
-    utils::fixed_header::FixedHeader,
-};
+use crate::{enums::packet_type::MqttPacketType, protocol::{header::Header, packets::*}};
 
-#[derive(Debug, Clone)]
-pub struct ConnectPacket {
-    pub client_id: String,
-    pub keep_alive: u16,
-    pub clean_session: bool,
-    pub username: Option<String>,
-    pub password: Option<String>,
-}
 
-#[derive(Debug, Clone)]
-pub struct PublishPacket {
-    pub topic: String,
-    pub payload: Vec<u8>,
-    pub qos: u8,
-    pub retain: bool,
-    pub dup: bool,
-}
-
-#[derive(Debug, Clone)]
-pub struct SubscribePacket {
-    pub packet_id: u16,
-    pub topic: String,
-    pub qos: u8,
-    pub subscribed_at: SystemTime
-}
-
-pub enum MqttPacket {
+pub enum MqttParser {
     Connect(ConnectPacket),
     Publish(PublishPacket),
     Subscribe(SubscribePacket),
+    Unsubscribe(UnsubscribePacket),
     PingReq,
     Disconnect,
 }
 
-impl MqttPacket {
-    pub fn parse_packet(buf: &mut BytesMut) -> Option<MqttPacket> {
-        let header = FixedHeader::parse(buf)?;
+impl MqttParser {
+    pub fn parse_packet(buf: &mut BytesMut) -> Option<MqttParser> {
+        let header = Header::parse(buf)?;
         if buf.len() < header.remaining_length {
             return None;
         }
@@ -53,8 +26,9 @@ impl MqttPacket {
             MqttPacketType::Connect => parse_connect(&mut packet_buf),
             MqttPacketType::Publish => parse_publish(header.flags, &mut packet_buf),
             MqttPacketType::Subscribe => parse_subscribe(&mut packet_buf),
-            MqttPacketType::PingReq => Some(MqttPacket::PingReq),
-            MqttPacketType::Disconnect => Some(MqttPacket::Disconnect),
+            MqttPacketType::Unsubscribe => parse_unsubscribe(&mut  packet_buf),
+            MqttPacketType::PingReq => Some(MqttParser::PingReq),
+            MqttPacketType::Disconnect => Some(MqttParser::Disconnect),
         _ => None,
 
         }
@@ -63,13 +37,13 @@ impl MqttPacket {
 }
 
 
-fn parse_connect(buf: &mut BytesMut) -> Option<MqttPacket> {
+fn parse_connect(buf: &mut BytesMut) -> Option<MqttParser> {
     let protocol_name = read_string(buf)?;
     if protocol_name != "MQTT" {
         return None;
     }
 
-    let protocol_level = buf.get_u8();
+    let protocol_level = buf.get_i8();
     if protocol_level != 4 {
         return None;
     }
@@ -94,7 +68,7 @@ fn parse_connect(buf: &mut BytesMut) -> Option<MqttPacket> {
         None
     };
 
-    Some(MqttPacket::Connect(ConnectPacket {
+    Some(MqttParser::Connect(ConnectPacket {
         client_id,
         keep_alive,
         clean_session,
@@ -103,19 +77,27 @@ fn parse_connect(buf: &mut BytesMut) -> Option<MqttPacket> {
     }))
 }
 
-fn parse_publish(flags: u8, buf: &mut BytesMut) -> Option<MqttPacket> {
+fn parse_publish(flags: u8, buf: &mut BytesMut) -> Option<MqttParser> {
     let dup = (flags & 0b1000) != 0;
     let qos = (flags & 0b0110) >> 1;
     let retain = (flags & 0b0001) != 0;
     let topic = read_string(buf)?;
 
-    if qos > 0 {
-        buf.advance(2); // packet identifier (skip for now)
-    }
+    let packet_id = if qos > 0 {
+        if buf.len() < 2 {
+            return None;
+        }
+        Some(buf.get_u16())
+    } else {
+        None
+    };
+
+
 
     let payload = buf.to_vec();
 
-    Some(MqttPacket::Publish(PublishPacket {
+    Some(MqttParser::Publish(PublishPacket {
+        packet_id,
         topic,
         payload,
         qos,
@@ -124,7 +106,7 @@ fn parse_publish(flags: u8, buf: &mut BytesMut) -> Option<MqttPacket> {
     }))
 }
 
-fn parse_subscribe(buf: &mut BytesMut) -> Option<MqttPacket> {
+fn parse_subscribe(buf: &mut BytesMut) -> Option<MqttParser> {
     if buf.len() < 2 {
         return None;
     }
@@ -134,7 +116,7 @@ fn parse_subscribe(buf: &mut BytesMut) -> Option<MqttPacket> {
     let topic = read_string(buf)?;
     let qos = buf.get_u8();
 
-    Some(MqttPacket::Subscribe(SubscribePacket {
+    Some(MqttParser::Subscribe(SubscribePacket {
         packet_id,
         topic,
         qos,
@@ -143,7 +125,15 @@ fn parse_subscribe(buf: &mut BytesMut) -> Option<MqttPacket> {
 
 }
 
+fn parse_unsubscribe(buf: &mut BytesMut) -> Option<MqttParser> {
+    let packet_id = buf.get_u16();
+    let topic = read_string(buf)?;
 
+    Some(MqttParser::Unsubscribe(UnsubscribePacket{
+        packet_id,
+        topic
+    }))
+}
 
  fn read_string(buf: &mut BytesMut) -> Option<String> {
     if buf.len() < 2 {

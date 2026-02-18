@@ -1,17 +1,17 @@
 use bytes::{Buf, BytesMut};
 
-use crate::{enums::mqtt_packet::MqttPacketType};
+use crate::{enums::packet_type::MqttPacketType};
 
 
 
-pub struct FixedHeader {
+pub struct Header {
     pub packet_type: MqttPacketType,
     pub flags: u8,
     pub remaining_length: usize
 }
 
-impl  FixedHeader  {
-    pub fn parse(buf : &mut BytesMut) -> Option<FixedHeader> {
+impl  Header  {
+    pub fn parse(buf : &mut BytesMut) -> Option<Header> {
         if buf.len() < 2 {
             return None;
         }
@@ -22,7 +22,7 @@ impl  FixedHeader  {
         let packet_type = MqttPacketType::from_u8(packet_type_raw)?;
         buf.advance(1);
         let remaining_length = Self::read_remaining_length(buf)?;
-        Some(FixedHeader { packet_type, flags, remaining_length })
+        Some(Header { packet_type, flags, remaining_length })
     }
 
     pub fn read_remaining_length(buf: &mut BytesMut) -> Option<usize> {

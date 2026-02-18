@@ -1,9 +1,9 @@
-use std::{net::SocketAddr, sync::Arc, time::{Duration, SystemTime}};
+use std::{ time::{ SystemTime}};
 use std::collections::HashMap;
 
-use tokio::sync::{Mutex, mpsc};
+use tokio::sync::{ mpsc};
 
-use crate::utils::mqtt_packet::{PublishPacket, SubscribePacket};
+use crate::{enums::MqttChannel, protocol::packets::{ SubscribePacket}};
 
 
 #[derive(Debug)]
@@ -13,7 +13,7 @@ pub struct Session {
     pub clean_session: bool,
     pub connected_at: SystemTime,
     pub subscriptions: HashMap<String, SubscribePacket>,
-    pub tx: mpsc::Sender<PublishPacket>,
+    pub tx: mpsc::Sender<MqttChannel>,
 }
 
 impl Session {
@@ -21,7 +21,7 @@ impl Session {
         client_id: String,
         username: String,
         clean_session: bool,
-        tx: mpsc::Sender<PublishPacket>,
+        tx: mpsc::Sender<MqttChannel>,
     ) -> Self {
         Self {
             client_id,

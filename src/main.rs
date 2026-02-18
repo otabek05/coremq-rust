@@ -1,44 +1,37 @@
-mod models;
-mod enums;
-mod brokers;
-mod engine;
-mod utils;
 
-use tokio::{net::TcpListener};
-use crate::brokers::tcp_broker::TcpBroker;
+mod enums;
+mod models;
+
+mod broker;
+mod protocol;
+mod services;
+mod storage;
+mod transport;
+
+use std::sync::Arc;
+
+use tokio::net::TcpListener;
+
+use crate::{broker::engine::Engine, transport::connection::handle_connection};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    let main_engine = engine::Engine::new();
+    let engine = Arc::new(Engine::new());
     let ports = vec![1883, 8883];
 
     for port in ports {
         let addr = format!("0.0.0.0:{}", port);
         let listener = TcpListener::bind(&addr).await?;
-
         println!("MQTT broker running on {}", addr);
-
-        // Broker should be Arc<Broker>
-        let broker = TcpBroker::new(
-            main_engine.clients.clone(),
-            main_engine.topic_tree.clone(),
-        );
-
-        // Store broker safely
-        main_engine
-            .brokers
-            .lock()
-            .await
-            .push(broker.clone());
+        let engine_for_listener = engine.clone();
 
         tokio::spawn(async move {
             loop {
                 match listener.accept().await {
                     Ok((socket, _)) => {
-                        let broker = broker.clone();
-
+                        let engine_port = engine_for_listener.clone();
                         tokio::spawn(async move {
-                            if let Err(e) = broker.handle_receive(socket).await {
+                            if let Err(e) =  handle_connection(socket, engine_port).await {
                                 eprintln!("client error: {}", e);
                             }
                         });
@@ -52,10 +45,9 @@ async fn main() -> anyhow::Result<()> {
         });
     }
 
-
-   // Wait until Ctrl+C
-tokio::signal::ctrl_c().await?;
-println!("Shutting down...");
+    // Wait until Ctrl+C
+    tokio::signal::ctrl_c().await?;
+    println!("Shutting down...");
 
     Ok(())
 }
