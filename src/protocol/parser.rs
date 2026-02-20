@@ -1,6 +1,7 @@
 use std::time::SystemTime;
 
 use bytes::{Buf, BytesMut};
+use chrono::Local;
 
 use crate::{enums::packet_type::MqttPacketType, protocol::{header::Header, packets::*}};
 
@@ -36,17 +37,28 @@ impl MqttParser {
 
 }
 
+/*
 
 fn parse_connect(buf: &mut BytesMut) -> Option<MqttParser> {
     let protocol_name = read_string(buf)?;
-    if protocol_name != "MQTT" {
-        return None;
+    let protocol_level = buf.get_i8();
+    println!("Mqtt protocol: {}", protocol_name);
+
+    match (protocol_name.as_str(), protocol_level) {
+        ("MQTT", 4) => {
+            println!("MQTT 3.1.1 client");
+        }
+        ("MQIsdp", 3) => {
+            println!("MQTT 3.1 client");
+        }
+        _ => {
+            println!("Unsupported MQTT version");
+            return None;
+        }
     }
 
-    let protocol_level = buf.get_i8();
-    if protocol_level != 4 {
-        return None;
-    }
+    println!("Total buffer length before parse: {}", buf.len());
+
 
     let connect_flags = buf.get_u8();
     let keep_alive = buf.get_u16();
@@ -57,16 +69,191 @@ fn parse_connect(buf: &mut BytesMut) -> Option<MqttParser> {
     let password_flag = (connect_flags & 0b0100_0000) != 0;
 
     let username = if username_flag {
-        Some(read_string(buf)?)
+    match read_string(buf) {
+        Some(u) => Some(u),
+        None => {
+            println!("Failed reading username");
+            return None;
+        }
+    }
+} else {
+            println!("Failed reading username: ");
+    None
+};
+
+/*
+
+let username = if username_flag {
+    Some(read_string(buf)?)
+} else {
+    None
+};
+*/
+
+
+   let password = if password_flag {
+    match read_string(buf) {
+        Some(p) => Some(p),
+        None => {
+            println!("Failed reading password");
+            return None;
+        }
+    }
+} else {
+    println!("Failed reading password: ");
+    None
+};
+/*
+let password = if password_flag {
+    Some(read_string(buf)?)
+} else {
+    None
+};
+
+*/
+
+
+Some(MqttParser::Connect(ConnectPacket {
+        client_id,
+        keep_alive,
+        clean_session,
+        username,
+        password,
+    }))
+}
+
+*/
+
+
+fn parse_connect(buf: &mut BytesMut) -> Option<MqttParser> {
+    println!("---- PARSING CONNECT ----");
+    println!("Initial buffer length: {}", buf.len());
+
+    let protocol_name = read_string(buf)?;
+    let protocol_level = buf.get_u8();
+
+    println!("Protocol: {}, Level: {}", protocol_name, protocol_level);
+
+    match (protocol_name.as_str(), protocol_level) {
+        ("MQTT", 4) => println!("MQTT 3.1.1 client"),
+        ("MQIsdp", 3) => println!("MQTT 3.1 client"),
+        _ => {
+            println!("Unsupported MQTT version");
+            return None;
+        }
+    }
+
+    if buf.len() < 3 {
+        println!("Buffer too small for flags + keepalive");
+        return None;
+    }
+
+    let connect_flags = buf.get_u8();
+    let keep_alive = buf.get_u16();
+
+    println!("Connect flags: {:08b}", connect_flags);
+    println!("Keep alive: {}", keep_alive);
+    println!("Buffer length after flags: {}", buf.len());
+
+    let clean_session = (connect_flags & 0b0000_0010) != 0;
+    let will_flag     = (connect_flags & 0b0000_0100) != 0;
+    let will_qos      = (connect_flags & 0b0001_1000) >> 3;
+    let will_retain   = (connect_flags & 0b0010_0000) != 0;
+    let password_flag = (connect_flags & 0b0100_0000) != 0;
+    let username_flag = (connect_flags & 0b1000_0000) != 0;
+
+    println!("clean_session: {}", clean_session);
+    println!("will_flag: {}", will_flag);
+    println!("will_qos: {}", will_qos);
+    println!("will_retain: {}", will_retain);
+    println!("username_flag: {}", username_flag);
+    println!("password_flag: {}", password_flag);
+
+    // ---- Client ID ----
+    let client_id = match read_string(buf) {
+        Some(id) => {
+            println!("Client ID: {}", id);
+            id
+        }
+        None => {
+            println!("Failed reading client_id");
+            return None;
+        }
+    };
+
+    println!("Buffer after client_id: {}", buf.len());
+
+    // ---- WILL ----
+    let will_topic = if will_flag {
+        match read_string(buf) {
+            Some(t) => {
+                println!("Will topic: {}", t);
+                Some(t)
+            }
+            None => {
+                println!("Failed reading will_topic");
+                return None;
+            }
+        }
     } else {
         None
     };
 
-    let password = if password_flag {
-        Some(read_string(buf)?)
+    let will_message = if will_flag {
+        match read_string(buf) {
+            Some(m) => {
+                println!("Will message len: {}", m.len());
+                Some(m)
+            }
+            None => {
+                println!("Failed reading will_message");
+                return None;
+            }
+        }
     } else {
         None
     };
+
+    println!("Buffer after will: {}", buf.len());
+
+    // ---- USERNAME ----
+    let username = if username_flag {
+        match read_string(buf) {
+            Some(u) => {
+                println!("Username: {}", u);
+                Some(u)
+            }
+            None => {
+                println!("Failed reading username");
+                return None;
+            }
+        }
+    } else {
+        println!("Username flag not set");
+        None
+    };
+
+    println!("Buffer after username: {}", buf.len());
+
+    // ---- PASSWORD ----
+    let password = if password_flag {
+        match read_string(buf) {
+            Some(p) => {
+                println!("Password length: {}", p.len());
+                Some(p)
+            }
+            None => {
+                println!("Failed reading password");
+                return None;
+            }
+        }
+    } else {
+        println!("Password flag not set");
+        None
+    };
+
+    println!("Buffer after password: {}", buf.len());
+    println!("---- CONNECT PARSED SUCCESSFULLY ----");
 
     Some(MqttParser::Connect(ConnectPacket {
         client_id,
@@ -120,7 +307,7 @@ fn parse_subscribe(buf: &mut BytesMut) -> Option<MqttParser> {
         packet_id,
         topic,
         qos,
-        subscribed_at: SystemTime::now()
+        subscribed_at: Local::now()
     }))
 
 }
@@ -135,7 +322,30 @@ fn parse_unsubscribe(buf: &mut BytesMut) -> Option<MqttParser> {
     }))
 }
 
- fn read_string(buf: &mut BytesMut) -> Option<String> {
+
+fn read_string(buf: &mut BytesMut) -> Option<String> {
+    if buf.len() < 2 {
+        println!("Not enough bytes for string length");
+        return None;
+    }
+
+    let len = ((buf[0] as usize) << 8) | (buf[1] as usize);
+    buf.advance(2); // consume length bytes
+
+    if buf.len() < len {
+        println!("Buffer too short for string, expected {} bytes, got {}", len, buf.len());
+        return None;
+    }
+
+    let s = std::str::from_utf8(&buf[..len]).ok()?.to_string();
+    buf.advance(len); // consume string bytes
+
+    Some(s)
+}
+
+
+/*
+fn read_string(buf: &mut BytesMut) -> Option<String> {
     if buf.len() < 2 {
         return None;
     }
@@ -148,3 +358,4 @@ fn parse_unsubscribe(buf: &mut BytesMut) -> Option<MqttParser> {
     let s = String::from_utf8(buf.split_to(len).to_vec()).ok()?;
     Some(s)
 }
+*/

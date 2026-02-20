@@ -7,11 +7,10 @@ mod transport;
 mod enums;
 mod models;
 mod api;
-
+mod utils;
 
 use crate::{
-    broker::engine::Engine,
-    transport::{tcp_connection::handle_connection, ws_connection::ws_handler},
+    api::{app_state::ApiState, router::RouterHandler}, broker::engine::Engine, transport::{tcp_connection::handle_connection, ws_connection::ws_handler}
 };
 use axum::{Router, routing::get};
 use tower_http::cors::CorsLayer;
@@ -49,11 +48,11 @@ async fn main() -> anyhow::Result<()> {
         });
     }
 
+    let engine_for_ws = engine.clone();
     tokio::spawn(async move {
-        let engine_cloned = engine.clone();
         let app = Router::new()
         .route("/mqtt", get(ws_handler))
-        .with_state(engine_cloned)
+        .with_state(engine_for_ws)
         .layer(CorsLayer::permissive());
     
         let addr = SocketAddr::from(([0, 0, 0, 0], 8083));
@@ -63,9 +62,14 @@ async fn main() -> anyhow::Result<()> {
             .unwrap();
     });
 
-    // Wait until Ctrl+C
-    tokio::signal::ctrl_c().await?;
-    println!("Shutting down...");
+
+    let state = ApiState{engine: engine.clone()};
+    let router  = RouterHandler::new();
+    let addr = format!("{}:{}", "localhost", 18083);
+    let listener = TcpListener::bind(addr).await.expect("Failed to bind address");
+    axum::serve(listener, router.create_router(state)).await.unwrap();
+   // tokio::signal::ctrl_c().await?;
+   // println!("Shutting down...");
 
     Ok(())
 }

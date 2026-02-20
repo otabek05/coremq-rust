@@ -13,6 +13,11 @@ impl ClientService {
     }
 
 
+    pub fn get_all(&self) -> Vec<Session> {
+       self.clients.values().cloned().collect()
+    }
+
+
     pub  fn add_client(&mut self, packet: &ConnectPacket, tx: mpsc::Sender<MqttChannel>) {
         let session = Session::new(
             packet.client_id.clone(), 

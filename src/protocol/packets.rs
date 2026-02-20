@@ -1,5 +1,8 @@
-use std::time::SystemTime;
 
+
+use chrono::{DateTime, Local};
+use serde::{Deserialize, Serialize};
+use crate::utils::format_time::format_datetime;
 #[derive(Debug, Clone)]
 pub struct ConnectPacket {
     pub client_id: String,
@@ -19,12 +22,14 @@ pub struct PublishPacket {
     pub dup: bool,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SubscribePacket {
     pub packet_id: u16,
     pub topic: String,
     pub qos: u8,
-    pub subscribed_at: SystemTime
+
+    #[serde(serialize_with = "format_datetime")]
+    pub subscribed_at: DateTime<Local>
 }
 
 #[derive(Debug, Clone)]

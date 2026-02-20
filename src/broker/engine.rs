@@ -3,10 +3,7 @@ use std::sync::Arc;
 use tokio::sync::{Mutex, mpsc};
 
 use crate::{
-    broker::actions::MqttResponse,
-    enums::MqttChannel,
-    protocol::{packets::PublishPacket, parser::MqttParser},
-    services::{ClientService, TopicService},
+    broker::actions::MqttResponse, enums::MqttChannel, models::session::Session, protocol::{packets::PublishPacket, parser::MqttParser}, services::{ClientService, TopicService}
 };
 
 #[derive(Clone)]
@@ -44,7 +41,7 @@ impl Engine {
 
                 self.client_service.lock().await.add_client(&p, tx);
                 MqttResponse::ConnAck {
-                    session_present: !p.clean_session,
+                    session_present: false,
                 }
             }
 
@@ -126,5 +123,9 @@ impl Engine {
                 let _ = tx.send(MqttChannel::Publish(p.clone())).await;
             }
         }
+    }
+
+    pub async fn get_clients(&self) -> Vec<Session> {
+        self.client_service.lock().await.get_all()
     }
 }

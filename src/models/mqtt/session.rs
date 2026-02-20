@@ -1,18 +1,25 @@
-use std::{ time::{ SystemTime}};
 use std::collections::HashMap;
-
+use chrono::{DateTime, Local};
+use serde::Serialize;
 use tokio::sync::{ mpsc};
 
-use crate::{enums::MqttChannel, protocol::packets::{ SubscribePacket}};
+use crate::{
+    enums::MqttChannel, 
+    utils::format_time::format_datetime,
+    protocol::packets::{ SubscribePacket}};
 
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Session {
     pub client_id: String,
     pub username: String,
     pub clean_session: bool,
-    pub connected_at: SystemTime,
+    
+    #[serde(serialize_with = "format_datetime")]
+    pub connected_at: DateTime<Local>,
     pub subscriptions: HashMap<String, SubscribePacket>,
+
+     #[serde(skip)]
     pub tx: mpsc::Sender<MqttChannel>,
 }
 
@@ -27,7 +34,7 @@ impl Session {
             client_id,
             username,
             clean_session,
-            connected_at: SystemTime::now(),
+            connected_at: Local::now(),
             subscriptions: HashMap::new(),
             tx,
         }
@@ -41,3 +48,5 @@ impl Session {
         self.subscriptions.remove(topic);
     }
 }
+
+
