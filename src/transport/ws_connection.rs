@@ -11,7 +11,7 @@ use futures_util::{stream::SplitSink, SinkExt, StreamExt};
 use tokio::sync::mpsc;
 
 use crate::{
-    broker::engine::Engine, enums::MqttChannel, protocol::{encoder::encode, packets::PublishPacket, parser::MqttParser}
+    broker::engine::Engine, enums::MqttChannel, protocol::{encoder::{encode_publish}, packets::PublishPacket, parser::MqttParser}
 };
 
 pub async fn ws_handler(ws: WebSocketUpgrade,  State(engine): State<Arc<Engine>>) -> impl IntoResponse {
@@ -95,7 +95,7 @@ async fn publish_ws(
     sender: &mut SplitSink<WebSocket, Message>,
     packet: PublishPacket,
 ) -> anyhow::Result<()> {
-    let bytes = encode(packet);
+    let bytes = encode_publish(&packet);
     sender.send(Message::Binary(bytes)).await?;
     Ok(())
 }

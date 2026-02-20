@@ -1,14 +1,17 @@
 use crate::protocol::packets::PublishPacket;
 
 
-pub fn encode(msg: PublishPacket) -> Vec<u8> {
-     let mut out = Vec::new();
+pub fn encode_publish(msg: &PublishPacket) -> Vec<u8> {
+    let mut out = Vec::new();
+
     let mut first_byte = 0b0011_0000;
+
     if msg.dup {
         first_byte |= 0b0000_1000;
     }
 
-    first_byte |= (msg.qos << 1) & 0b0000_0110;
+    let qos = msg.qos & 0x03;
+    first_byte |= qos << 1;
 
     if msg.retain {
         first_byte |= 0b0000_0001;
@@ -16,24 +19,45 @@ pub fn encode(msg: PublishPacket) -> Vec<u8> {
 
     out.push(first_byte);
 
-    let mut remaining_len = 2 + msg.topic.len() + msg.payload.len();
+    let mut remaining_len =
+        2 + msg.topic.len() + msg.payload.len();
 
-    if msg.qos > 0 {
+    if qos > 0 {
         remaining_len += 2;
     }
 
-    out.push(remaining_len as u8);
+    out.extend(encode_remaining_length(remaining_len));
 
     out.extend_from_slice(&(msg.topic.len() as u16).to_be_bytes());
     out.extend_from_slice(msg.topic.as_bytes());
 
-    if msg.qos > 0 {
-        if let Some(packet_id) = msg.packet_id {
-            out.extend_from_slice(&packet_id.to_be_bytes());
-        }
+    if qos > 0 {
+        let packet_id = msg.packet_id.expect("QoS > 0 requires packet_id");
+        out.extend_from_slice(&packet_id.to_be_bytes());
     }
 
     out.extend_from_slice(&msg.payload);
-    out
 
+    out
+}
+
+fn encode_remaining_length(mut len: usize) -> Vec<u8> {
+    let mut encoded = Vec::new();
+
+    loop {
+        let mut byte = (len % 128) as u8;
+        len /= 128;
+
+        if len > 0 {
+            byte |= 0x80;
+        }
+
+        encoded.push(byte);
+
+        if len == 0 {
+            break;
+        }
+    }
+
+    encoded
 }

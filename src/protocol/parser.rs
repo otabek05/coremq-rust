@@ -61,9 +61,9 @@ fn parse_connect(buf: &mut BytesMut) -> Option<MqttParser> {
     let keep_alive = buf.get_u16();
 
     let clean_session = (connect_flags & 0b0000_0010) != 0;
-   // let will_flag     = (connect_flags & 0b0000_0100) != 0;
-   // let will_qos      = (connect_flags & 0b0001_1000) >> 3;
-  //  let will_retain   = (connect_flags & 0b0010_0000) != 0;
+    let will_flag     = (connect_flags & 0b0000_0100) != 0;
+    let will_qos      = (connect_flags & 0b0001_1000) >> 3;
+    let will_retain   = (connect_flags & 0b0010_0000) != 0;
     let password_flag = (connect_flags & 0b0100_0000) != 0;
     let username_flag = (connect_flags & 0b1000_0000) != 0;
 
@@ -81,7 +81,7 @@ fn parse_connect(buf: &mut BytesMut) -> Option<MqttParser> {
     println!("Buffer after client_id: {}", buf.len());
 
 
-    /*
+    
     
     // ---- WILL ----
     let will_topic = if will_flag {
@@ -115,7 +115,7 @@ fn parse_connect(buf: &mut BytesMut) -> Option<MqttParser> {
         None
     };
 
-    */
+    
 
     let username = if username_flag {
         match read_string(buf) {
