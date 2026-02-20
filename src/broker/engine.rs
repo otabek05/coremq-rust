@@ -1,9 +1,13 @@
-use std::{ sync::Arc};
+use std::sync::Arc;
 
 use tokio::sync::{Mutex, mpsc};
 
-use crate::{broker::actions::MqttResponse, enums::MqttChannel, protocol::{packets::PublishPacket, parser::MqttParser}, services::{ClientService, TopicService}};
-
+use crate::{
+    broker::actions::MqttResponse,
+    enums::MqttChannel,
+    protocol::{packets::PublishPacket, parser::MqttParser},
+    services::{ClientService, TopicService},
+};
 
 #[derive(Clone)]
 pub struct Engine {
@@ -27,25 +31,35 @@ impl Engine {
     ) -> MqttResponse {
         match packet {
             MqttParser::Connect(p) => {
-                if let Some(session) = self.client_service.lock().await.remove_client(&p.client_id) {
-                    self.topic_service.lock().await.remove_client(&session.client_id);
+                println!("Client connected: {}", client_id);
+                if let Some(session) = self.client_service.lock().await.remove_client(&p.client_id)
+                {
+                    self.topic_service
+                        .lock()
+                        .await
+                        .remove_client(&session.client_id);
                     let _ = session.tx.send(MqttChannel::Disconnect).await;
                     drop(session);
                 }
 
                 self.client_service.lock().await.add_client(&p, tx);
-                MqttResponse::ConnAck {session_present: !p.clean_session,}
+                MqttResponse::ConnAck {
+                    session_present: !p.clean_session,
+                }
             }
 
             MqttParser::Disconnect => {
-                 if let Some(session) = self.client_service.lock().await.remove_client(client_id) {
-                    self.topic_service.lock().await.remove_client(&session.client_id);
+                if let Some(session) = self.client_service.lock().await.remove_client(client_id) {
+                    self.topic_service
+                        .lock()
+                        .await
+                        .remove_client(&session.client_id);
                     let _ = session.tx.send(MqttChannel::Disconnect).await;
                     drop(session);
                 }
 
                 MqttResponse::Disconnect
-            } 
+            }
 
             MqttParser::Subscribe(p) => {
                 self.client_service
@@ -78,13 +92,23 @@ impl Engine {
             MqttParser::Publish(p) => {
                 self.publish(p.clone()).await;
                 if let Some(packet_id) = p.packet_id {
-                   return  MqttResponse::PubAck { packet_id };
+                    return MqttResponse::PubAck { packet_id };
                 }
 
                 MqttResponse::None
-            } 
+            }
 
             MqttParser::PingReq => MqttResponse::PingResp,
+        }
+    }
+
+    pub async fn drop_client(&self, client_id: &str) {
+        if let Some(mut session) = self.client_service.lock().await.remove_client(client_id) {
+            self.topic_service
+                .lock()
+                .await
+                .remove_client(&session.client_id);
+            let _ = session.tx.send(MqttChannel::Disconnect).await;
         }
     }
 

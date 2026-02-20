@@ -43,7 +43,7 @@ async fn handle_socket(socket: WebSocket, engine: Arc<Engine>,) {
                                      }
 
                                      let action = engine.handle(&client_id, &packet, tx.clone()).await;
-                                     action.send_ws(&mut sender).await;
+                                     let _ = action.send_ws(&mut sender).await;
                                 }
                             }
 
