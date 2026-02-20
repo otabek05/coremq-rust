@@ -30,7 +30,6 @@ pub async fn handle_connection(mut socket: TcpStream, engine: Arc<Engine>) -> an
                      _ = ticker.tick() => {
                     if last_activity.elapsed() >= timeout_duration {
                          engine.drop_client(&client_id).await;
-                     
                          println!("Connection timeout: {}", client_id);
                          break;
                     }
@@ -55,7 +54,6 @@ pub async fn handle_connection(mut socket: TcpStream, engine: Arc<Engine>) -> an
 
                                        if let MqttParser::PingReq = packet {
                                          last_activity = Instant::now();
-                                           println!("time resetting");
                                        }
 
                                        let action = engine.handle(&client_id, &packet, tx.clone()).await;
@@ -69,7 +67,7 @@ pub async fn handle_connection(mut socket: TcpStream, engine: Arc<Engine>) -> an
                                      publish(&mut socket, packet).await?;
                                 }
                                 Some(MqttChannel::Disconnect) => {
-                                      println!("Client has been disconnected: {}", client_id);
+                                      println!("Client disconnected: {}", client_id);
                                       break;
                                 }
                                 None => {

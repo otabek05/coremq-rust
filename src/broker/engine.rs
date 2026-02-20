@@ -100,7 +100,7 @@ impl Engine {
     }
 
     pub async fn drop_client(&self, client_id: &str) {
-        if let Some(mut session) = self.client_service.lock().await.remove_client(client_id) {
+        if let Some(session) = self.client_service.lock().await.remove_client(client_id) {
             self.topic_service
                 .lock()
                 .await

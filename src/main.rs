@@ -25,7 +25,7 @@ async fn main() -> anyhow::Result<()> {
     for port in ports {
         let addr = format!("0.0.0.0:{}", port);
         let listener = TcpListener::bind(&addr).await?;
-        println!("MQTT broker running on {}", addr);
+        println!("MQTT over TCP/TLS running on {}", addr);
         let engine_for_listener = engine.clone();
 
         tokio::spawn(async move {
@@ -56,7 +56,7 @@ async fn main() -> anyhow::Result<()> {
         .layer(CorsLayer::permissive());
     
         let addr = SocketAddr::from(([0, 0, 0, 0], 8083));
-        println!("Listening on {}", addr);
+        println!("Mqtt over WS running {}", addr);
         axum::serve(tokio::net::TcpListener::bind(addr).await.unwrap(), app)
             .await
             .unwrap();
@@ -66,10 +66,9 @@ async fn main() -> anyhow::Result<()> {
     let state = ApiState{engine: engine.clone()};
     let router  = RouterHandler::new();
     let addr = format!("{}:{}", "localhost", 18083);
-    let listener = TcpListener::bind(addr).await.expect("Failed to bind address");
+    let listener = TcpListener::bind(addr.clone()).await.expect("Failed to bind address");
+    println!("Admin Pannel running on {}", addr);
     axum::serve(listener, router.create_router(state)).await.unwrap();
-   // tokio::signal::ctrl_c().await?;
-   // println!("Shutting down...");
 
     Ok(())
 }

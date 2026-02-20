@@ -1,7 +1,7 @@
-use axum::{Router, routing::{Route, get}};
+use axum::{Router, routing::{ get}};
 use tower_http::cors::{Any, CorsLayer};
 
-use crate::{api::{app_state::ApiState, controllers::clients}, models::session::Session};
+use crate::{api::{app_state::ApiState, controllers::clients}};
 
 pub struct  RouterHandler {}
 
