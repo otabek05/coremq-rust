@@ -19,6 +19,9 @@ use tokio::net::TcpListener;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
+    let pid = std::process::id();
+    println!("Current process ID: {}", pid);
+    
     let engine = Arc::new(Engine::new());
     let ports = vec![1883, 8883];
 

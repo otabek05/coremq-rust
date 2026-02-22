@@ -1,51 +1,69 @@
-use std::{collections::HashMap};
+
+
+use dashmap::DashMap;
 use tokio::sync::mpsc;
-use crate::{enums::MqttChannel, models::session::Session, protocol::packets::{ConnectPacket,  SubscribePacket}};
+
+use crate::{
+    enums::MqttChannel,
+    models::session::Session,
+    protocol::packets::{ConnectPacket, SubscribePacket},
+};
 
 pub struct ClientService {
-    clients: HashMap<String, Session>
+    clients: DashMap<String, Session>,
 }
-
 
 impl ClientService {
     pub fn new() -> Self {
-        Self { clients: HashMap::new() }
-    }
-
-
-    pub fn get_all(&self) -> Vec<Session> {
-       self.clients.values().cloned().collect()
-    }
-
-
-    pub  fn add_client(&mut self, packet: &ConnectPacket, tx: mpsc::Sender<MqttChannel>) {
-        let session = Session::new(
-            packet.client_id.clone(), 
-            packet.username.clone().unwrap_or_default(), 
-            packet.clean_session, 
-            tx);
-        self.clients.insert(packet.client_id.clone().to_string(), session);
-    }
-
-    pub fn remove_client(&mut self, client_id:&str) -> Option<Session> {
-        self.clients.remove(client_id)
-    }
-
-    pub fn get_session(&mut self, key:&str) -> Option<&mut Session> {
-        self.clients.get_mut(key)
-    }
-
-    pub fn add_subscribtion(&mut self, client_id: &str, sub: &SubscribePacket) {
-      if let Some(session) = self.clients.get_mut(client_id) {
-        session.add_subscription(sub.clone());
-      }
-    }
-
-    pub fn remove_subscribtion(&mut self, client_id:&str, topic: &str) {
-        if let  Some(session) = self.clients.get_mut(client_id) {
-            session.remove_subscription(topic);
+        Self {
+            clients: DashMap::new(),
         }
     }
 
+    pub fn get_all(&self) -> Vec<Session> {
+        self.clients.iter().map(|r| r.value().clone()).collect()
+    }
 
+    pub fn add_client(
+        &self,
+        packet: &ConnectPacket,
+        tx: mpsc::Sender<MqttChannel>,
+    ) {
+        let session = Session::new(
+            packet.client_id.clone(),
+            packet.username.clone().unwrap_or_default(),
+            packet.clean_session,
+            tx,
+        );
+
+        self.clients.insert(packet.client_id.clone(), session);
+    }
+
+    pub fn remove_client(&self, client_id: &str) -> Option<Session> {
+        self.clients.remove(client_id).map(|(_, v)| v)
+    }
+
+    pub fn get_session(&self, key: &str) -> Option<Session> {
+        self.clients.get(key).map(|r| r.value().clone())
+    }
+
+    pub fn add_subscribtion(
+        &self,
+        client_id: &str,
+        sub: &SubscribePacket,
+    ) {
+        if let Some(mut session) = self.clients.get_mut(client_id) {
+            session.add_subscription(sub.clone());
+        }
+    }
+
+    pub fn remove_subscribtion(
+        &self,
+        client_id: &str,
+        topic: &str,
+    ) {
+        if let Some(mut session) = self.clients.get_mut(client_id) {
+            session.remove_subscription(topic);
+        }
+    }
 }

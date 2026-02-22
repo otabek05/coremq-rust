@@ -47,13 +47,13 @@ fn parse_connect(buf: &mut BytesMut) -> Option<MqttParser> {
         ("MQTT", 4) => println!("MQTT 3.1.1 client"),
         ("MQIsdp", 3) => println!("MQTT 3.1 client"),
         _ => {
-            println!("Unsupported MQTT version");
+          //  println!("Unsupported MQTT version");
             return None;
         }
     }
 
     if buf.len() < 3 {
-        println!("Buffer too small for flags + keepalive");
+      //  println!("Buffer too small for flags + keepalive");
         return None;
     }
 
@@ -69,7 +69,7 @@ fn parse_connect(buf: &mut BytesMut) -> Option<MqttParser> {
 
     let client_id = match read_string(buf) {
         Some(id) => {
-            println!("Client ID: {}", id);
+         //   println!("Client ID: {}", id);
             id
         }
         None => {
@@ -78,7 +78,7 @@ fn parse_connect(buf: &mut BytesMut) -> Option<MqttParser> {
         }
     };
 
-    println!("Buffer after client_id: {}", buf.len());
+  //  println!("Buffer after client_id: {}", buf.len());
 
 
     
@@ -87,7 +87,7 @@ fn parse_connect(buf: &mut BytesMut) -> Option<MqttParser> {
     let will_topic = if will_flag {
         match read_string(buf) {
             Some(t) => {
-                println!("Will topic: {}", t);
+              //  println!("Will topic: {}", t);
                 Some(t)
             }
             None => {
@@ -103,7 +103,7 @@ fn parse_connect(buf: &mut BytesMut) -> Option<MqttParser> {
     let will_message = if will_flag {
         match read_string(buf) {
             Some(m) => {
-                println!("Will message len: {}", m.len());
+               // println!("Will message len: {}", m.len());
                 Some(m)
             }
             None => {
@@ -120,7 +120,7 @@ fn parse_connect(buf: &mut BytesMut) -> Option<MqttParser> {
     let username = if username_flag {
         match read_string(buf) {
             Some(u) => {
-                println!("Username: {}", u);
+              //  println!("Username: {}", u);
                 Some(u)
             }
             None => {
@@ -129,14 +129,14 @@ fn parse_connect(buf: &mut BytesMut) -> Option<MqttParser> {
             }
         }
     } else {
-        println!("Username flag not set");
+       // println!("Username flag not set");
         None
     };
 
     let password = if password_flag {
         match read_string(buf) {
             Some(p) => {
-                println!("Password length: {}", p.len());
+            //    println!("Password length: {}", p.len());
                 Some(p)
             }
             None => {
@@ -145,7 +145,7 @@ fn parse_connect(buf: &mut BytesMut) -> Option<MqttParser> {
             }
         }
     } else {
-        println!("Password flag not set");
+      // println!("Password flag not set");
         None
     };
 

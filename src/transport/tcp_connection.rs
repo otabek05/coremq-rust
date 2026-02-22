@@ -1,11 +1,4 @@
 use std::{sync::Arc, time::Duration};
-
-use crate::{
-    broker::engine::Engine,
-    enums::MqttChannel,
-    protocol::{encoder::encode_publish, packets::PublishPacket, parser::MqttParser},
-};
-use anyhow::Ok;
 use bytes::BytesMut;
 use tokio::{
     io::{AsyncReadExt, AsyncWriteExt},
@@ -14,77 +7,139 @@ use tokio::{
     time::{self, Instant},
 };
 
-pub async fn handle_connection(mut socket: TcpStream, engine: Arc<Engine>) -> anyhow::Result<()> {
-    let (tx, mut rx) = mpsc::channel::<MqttChannel>(32);
-    let mut buffer = BytesMut::with_capacity(1024);
-    let mut client_id = String::new();
-    let mut timeout_duration = Duration::from_secs(60);
+use crate::{
+    broker::engine::Engine,
+    enums::MqttChannel,
+    protocol::{
+        encoder::encode_publish,
+        packets::PublishPacket,
+        parser::MqttParser,
+    },
+};
 
+pub async fn handle_connection(
+    mut socket: TcpStream,
+    engine: Arc<Engine>,
+) -> anyhow::Result<()> {
+    let (tx, mut rx) = mpsc::channel::<MqttChannel>(2048);
+    let mut buffer = BytesMut::with_capacity(4096);
+
+    let mut client_id: Option<String> = None;
+    let mut timeout_duration = Duration::from_secs(60);
     let mut last_activity = Instant::now();
-    let mut ticker = time::interval(Duration::from_secs(10));
-    ticker.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Delay);
+    let mut disconnect_requested = false;
+
+    let mut ticker = time::interval(Duration::from_secs(5));
+    ticker.set_missed_tick_behavior(time::MissedTickBehavior::Delay);
 
     loop {
         tokio::select! {
-
-                     _ = ticker.tick() => {
-                    if last_activity.elapsed() >= timeout_duration {
-                         engine.drop_client(&client_id).await;
-                         println!("Connection timeout: {}", client_id);
-                         break;
+            // 🔹 Idle timeout check
+            _ = ticker.tick() => {
+                if last_activity.elapsed() >= timeout_duration {
+                    if let Some(ref id) = client_id {
+                        request_disconnect(&tx, &mut disconnect_requested).await;
+                        println!("Idle timeout, requesting disconnect for {}", id);
                     }
                 }
+            }
 
-                        read = socket.read_buf(&mut buffer) => {
-
-                                let n = read?;
-                                if n == 0 {
-                                    println!("Socket closed by client: {}", client_id);
-                                    engine.drop_client(&client_id).await;
-                                    break;
-                                }
-
-                                while let Some(packet) = MqttParser::parse_packet(&mut buffer) {
-                                    if let MqttParser::Connect(ref p) = packet {
-                                        client_id = p.client_id.clone();
-                                        println!("keep: alive: {}", p.keep_alive * 3 /2);
-                                        timeout_duration = Duration::from_secs((p.keep_alive as u64) * 3 / 2);
-
-                                       }
-
-                                       if let MqttParser::PingReq = packet {
-                                         last_activity = Instant::now();
-                                       }
-
-                                       let action = engine.handle(&client_id, &packet, tx.clone()).await;
-                                             action.send_tcp(&mut socket).await?
-                                       }
+            // 🔹 Socket read branch
+            read = socket.read_buf(&mut buffer) => {
+                match read {
+                    Ok(0) => {
+                        if let Some(ref id) = client_id {
+                            request_disconnect(&tx, &mut disconnect_requested).await;
+                            println!("Socket closed by client {}, requesting disconnect", id);
                         }
+                        break;
+                    }
 
-                        msg = rx.recv() => {
-                           match msg {
-                               Some(MqttChannel::Publish(packet)) => {
-                                     publish(&mut socket, packet).await?;
+                    Ok(_) => {
+                        last_activity = Instant::now();
+
+                        while let Some(packet) = MqttParser::parse_packet(&mut buffer) {
+                            match &packet {
+                                MqttParser::Connect(p) => {
+                                    client_id = Some(p.client_id.clone());
+                                    timeout_duration = Duration::from_secs((p.keep_alive as u64) * 3 / 2);
+                                    println!("Client connected: {}", p.client_id);
                                 }
-                                Some(MqttChannel::Disconnect) => {
-                                      println!("Client disconnected: {}", client_id);
-                                      break;
+                                MqttParser::PingReq | MqttParser::Publish(_) => {
+                                    last_activity = Instant::now();
                                 }
-                                None => {
-                                      println!("Channel closed, ending connection: {}", client_id);
-                                      break;
-                               }
+                                _ => {}
+                            }
+
+                            if let Some(ref id) = client_id {
+                                let action = engine.handle(id, &packet, tx.clone()).await;
+                                let _ = action.send_tcp(&mut socket).await;
                             }
                         }
+                    }
 
-
+                    Err(err) => {
+                        eprintln!("Socket read error: {:?}", err);
+                        if let Some(ref id) = client_id {
+                            request_disconnect(&tx, &mut disconnect_requested).await;
+                        }
+                        break;
+                    }
                 }
+            }
+
+            // 🔹 Mailbox branch
+            msg = rx.recv() => {
+                match msg {
+                    Some(MqttChannel::Disconnect) => {
+                        if let Some(ref id) = client_id {
+                            println!("Disconnect received, cleaning client: {}", id);
+                        }
+                        break;
+                    }
+
+                    Some(MqttChannel::Publish(packet)) => {
+                        if publish(&mut socket, packet).await.is_err() {
+                            if let Some(ref id) = client_id {
+                                request_disconnect(&tx, &mut disconnect_requested).await;
+                                println!("Failed to publish to {}, requesting disconnect", id);
+                            }
+                        }
+                    }
+
+                    None => {
+                        if let Some(ref id) = client_id {
+                            println!("Mailbox closed for client: {}", id);
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    if let Some(id) = client_id {
+        engine.drop_client(&id).await;
+        println!("Cleanup complete for client: {}", id);
     }
 
     Ok(())
 }
 
-async fn publish(socket: &mut TcpStream, msg: PublishPacket) -> anyhow::Result<()> {
+async fn request_disconnect(
+    tx: &mpsc::Sender<MqttChannel>,
+    flag: &mut bool,
+) {
+    if !*flag {
+        let _ = tx.send(MqttChannel::Disconnect).await;
+        *flag = true;
+    }
+}
+
+async fn publish(
+    socket: &mut TcpStream,
+    msg: PublishPacket,
+) -> anyhow::Result<()> {
     let bytes = encode_publish(&msg);
     socket.write_all(&bytes).await?;
     Ok(())
