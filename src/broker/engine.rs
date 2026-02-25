@@ -34,7 +34,7 @@ impl Engine {
                 let old_session = self.client_service.remove_client(&p.client_id);
 
                 if let Some(session) = old_session {
-                    self.topic_service.remove_client(&session.client_id).await;
+                  //  self.topic_service.remove_client(&session.client_id);
                     let _ = session.tx.send(MqttChannel::Disconnect).await;
                 }
 
@@ -52,7 +52,7 @@ impl Engine {
 
             MqttParser::Subscribe(p) => {
                 self.client_service.add_subscribtion(client_id, p);
-                self.topic_service.subscribe(&p.topic, client_id).await;
+               // self.topic_service.subscribe(&p.topic, client_id);
 
                 MqttResponse::SubAck {
                     packet_id: p.packet_id,
@@ -61,7 +61,7 @@ impl Engine {
 
             MqttParser::Unsubscribe(p) => {
                 self.client_service.remove_subscribtion(client_id, &p.topic);
-                self.topic_service.unsubscribe(&p.topic, client_id).await;
+            //    self.topic_service.unsubscribe(&p.topic, client_id);
 
                 MqttResponse::UnsubAck {
                     packet_id: p.packet_id,
@@ -81,15 +81,16 @@ impl Engine {
             MqttParser::PingReq => MqttResponse::PingResp,
         }
     }
+/*
 
-    pub async fn drop_client(&self, client_id: &str) {
+    pub async fn drop_client(&mut self, client_id: &str) {
         if let Some(session) = self.client_service.remove_client(client_id) {
-            self.topic_service.remove_client(&session.client_id).await;
+            self.topic_service.remove_client(&session.client_id);
         }
     }
-
+*/
     async fn publish(&self, p: PublishPacket) {
-        let subscribers = self.topic_service.match_subscribers(&p.topic).await;
+        let subscribers = self.topic_service.match_subscribers(&p.topic);
         for client_id in subscribers {
             if let Some(session) = self.client_service.get_session(&client_id) {
                 let _ = session.tx.try_send(MqttChannel::Publish(p.clone()));

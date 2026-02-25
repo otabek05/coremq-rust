@@ -119,7 +119,7 @@ pub async fn handle_connection(
     }
 
     if let Some(id) = client_id {
-        engine.drop_client(&id).await;
+      //  engine.drop_client(&id).await;
         println!("Cleanup complete for client: {}", id);
     }
 
