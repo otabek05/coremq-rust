@@ -20,10 +20,6 @@ impl ClientService {
         }
     }
 
-    pub fn get_all(&self) -> Vec<Session> {
-        self.clients.iter().map(|r| r.value().clone()).collect()
-    }
-
     pub fn add_client(
         &self,
         packet: &ConnectPacket,

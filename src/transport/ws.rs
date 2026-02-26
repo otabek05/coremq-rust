@@ -1,26 +1,46 @@
-use bytes::BytesMut;
 use std::{sync::Arc, time::Duration};
+
+use axum::{
+    extract::{
+        State, WebSocketUpgrade,
+        ws::{Message, WebSocket},
+    },
+    response::IntoResponse,
+};
+use bytes::BytesMut;
+use futures_util::{SinkExt, StreamExt, stream::SplitSink};
 use tokio::{
-    io::{AsyncReadExt, AsyncWriteExt},
-    net::TcpStream,
     sync::mpsc,
     time::{self, Instant},
 };
 
 use crate::{
-    engine::{ConnectCommand, PubSubCommand}, enums::MqttChannel, protocol::{decoder::Decoder, encoder::{Encoder, encode_publish}, packets::PublishPacket}, transport::ProtocolState
+    engine::{ConnectCommand, PubSubCommand},
+    enums::MqttChannel,
+    protocol::{
+        decoder::Decoder,
+        encoder::{Encoder, encode_publish},
+        packets::PublishPacket,
+    },
+    transport::ProtocolState,
 };
 
-pub async fn tcp_connection(
-    mut socket: TcpStream,
-    state: Arc<ProtocolState>,
-   // connect_tx: mpsc::UnboundedSender<ConnectCommand>,
-  //  pubsub_tx: mpsc::UnboundedSender<PubSubCommand>,
-) -> anyhow::Result<()> {
-    let (tx, mut rx) = mpsc::channel::<MqttChannel>(2048);
-    let mut buffer = BytesMut::with_capacity(4096);
+pub async fn ws_handler(
+    ws: WebSocketUpgrade,
+    State(engine): State<Arc<ProtocolState>>,
+) -> impl IntoResponse {
+    ws.protocols(["mqtt"])
+        .on_upgrade(move |socket| handle_socket(socket, engine))
+}
 
-    let mut client_id: Option<String> = None;
+async fn handle_socket(socket: WebSocket, state: Arc<ProtocolState>) {
+    println!("Client connected via WebSocket");
+
+    let (tx, mut rx) = mpsc::channel::<MqttChannel>(32);
+    let (mut sender, mut receiver) = socket.split();
+
+    let mut buffer = BytesMut::with_capacity(1024);
+    let mut client_id = None;
     let mut timeout_duration = Duration::from_secs(60);
     let mut last_activity = Instant::now();
     let mut disconnect_requested = false;
@@ -30,8 +50,8 @@ pub async fn tcp_connection(
 
     loop {
         tokio::select! {
-                    // 🔹 Idle timeout check
-                    _ = ticker.tick() => {
+
+                _ = ticker.tick() => {
                         if last_activity.elapsed() >= timeout_duration {
                             if let Some(_) = client_id {
                                 request_disconnect(&tx, &mut disconnect_requested).await;
@@ -39,20 +59,16 @@ pub async fn tcp_connection(
                         }
                     }
 
-                    read = socket.read_buf(&mut buffer) => {
-                        match read {
-                            Ok(0) => {
-                                if let Some(_) = client_id {
-                                    request_disconnect(&tx, &mut disconnect_requested).await;
-                                }
-                                break;
-                            }
-
-                            Ok(_) => {
-                                last_activity = Instant::now();
-
+            Some(result) = receiver.next() => {
+                match result {
+                    Ok(msg) => {
+                        match msg {
+                            Message::Binary(data) => {
+                                buffer.extend_from_slice(&data);
                                 while let Some(packet) = Decoder::parse_packet(&mut buffer) {
-                                  let action: Encoder =   match &packet {
+
+
+                                     let action: Encoder =   match &packet {
                                         Decoder::Connect(p) => {
                                             client_id = Some(p.client_id.clone());
                                             timeout_duration = Duration::from_secs((p.keep_alive as u64) * 3 / 2);
@@ -89,7 +105,7 @@ pub async fn tcp_connection(
                                             if let Some(ref id) = client_id {
                                                  let _ = state.pubsub_tx.send(PubSubCommand::Subscribe(p.clone(), id.clone()));
                                             }
-                                          
+
                                             Encoder::SubAck { packet_id: p.packet_id }
                                         }
 
@@ -97,63 +113,70 @@ pub async fn tcp_connection(
                                             if let Some(ref id) = client_id {
                                                 let _ = state.pubsub_tx.send(PubSubCommand::Unsubscribe(p.clone(), id.clone()));
                                             }
-                                            
+
                                             Encoder::UnsubAck { packet_id: p.packet_id }
                                         }
+
                                     };
 
 
-                                    let _ = action.send_tcp(&mut socket).await;
+                                    let _ = action.send_ws(&mut sender).await;
 
                                 }
                             }
 
-                            Err(_) => {
-  
-                                if let Some(_) = client_id {
-                                    request_disconnect(&tx, &mut disconnect_requested).await;
-                                }
+                            Message::Close(_) => {
+
+                                 request_disconnect(&tx, &mut disconnect_requested).await;
                                 break;
                             }
+
+                            _ => {}
                         }
                     }
 
-           
-                    msg = rx.recv() => {
-                        match msg {
-                            Some(MqttChannel::Disconnect) => {
-                                if let Some(ref id) = client_id {
-                                    let _ =  state.connect_tx.send(ConnectCommand::Disconnect(id.clone())).unwrap();
-                                }
-                                break;
-                            }
-
-                            Some(MqttChannel::Publish(packet)) => {
-                                if publish(&mut socket, packet).await.is_err() {
-                                    if let Some(_) = client_id {
-                                        request_disconnect(&tx, &mut disconnect_requested).await;
-                                    }
-                                }
-                            }
-
-                            None => {
-                                if let Some(ref id) = client_id {
-                                    println!("Mailbox closed for client: {}", id);
-                                }
-                                break;
-                            }
-                        }
+                    Err(e) => {
+                        println!("WebSocket error: {:?}", e);
+                        break;
                     }
                 }
+            }
+
+            channel_msg = rx.recv() => {
+                match channel_msg {
+                    Some(MqttChannel::Publish(packet)) => {
+                        if let Err(e) = publish_ws(&mut sender, packet).await {
+                            println!("Publish WS error: {:?}", e);
+                            break;
+                        }
+                    }
+
+                    Some(MqttChannel::Disconnect) => {
+                          if let Some(ref id) = client_id {
+                                    let _ =  state.connect_tx.send(ConnectCommand::Disconnect(id.clone())).unwrap();
+                        }
+                        break;
+                    }
+
+                    None => {
+                        break;
+                    }
+                }
+            }
+
+            else => break,
+        }
     }
 
     if let Some(id) = client_id {
-          let _ =  state.connect_tx.send(ConnectCommand::Disconnect(id.clone())).unwrap();
+        let _ = state
+            .connect_tx
+            .send(ConnectCommand::Disconnect(id.clone()))
+            .unwrap();
     }
 
-    Ok(())
+    println!("WebSocket connection closed");
 }
-
 
 async fn request_disconnect(tx: &mpsc::Sender<MqttChannel>, flag: &mut bool) {
     if !*flag {
@@ -161,9 +184,12 @@ async fn request_disconnect(tx: &mpsc::Sender<MqttChannel>, flag: &mut bool) {
         *flag = true;
     }
 }
-    
-async fn publish(socket: &mut TcpStream, msg: PublishPacket) -> anyhow::Result<()> {
-    let bytes = encode_publish(&msg);
-    socket.write_all(&bytes).await?;
+
+async fn publish_ws(
+    sender: &mut SplitSink<WebSocket, Message>,
+    packet: PublishPacket,
+) -> anyhow::Result<()> {
+    let bytes = encode_publish(&packet);
+    sender.send(Message::Binary(bytes)).await?;
     Ok(())
 }

@@ -1,6 +1,81 @@
 use crate::protocol::packets::PublishPacket;
 
 
+use axum::extract::ws::{Message, WebSocket};
+use futures_util::{SinkExt, stream::SplitSink};
+use tokio::{io::AsyncWriteExt, net::TcpStream};
+
+
+
+pub enum Encoder {
+    ConnAck { session_present: bool },
+    SubAck { packet_id: u16 },
+    UnsubAck { packet_id: u16 },
+    PubAck {  packet_id: u16},
+    PingResp,
+    Disconnect,
+    None
+}
+
+
+impl Encoder {
+    pub fn to_bytes(&self) -> Vec<u8> {
+        match self {
+            Encoder::ConnAck { session_present } => vec![
+                0x20,
+                0x02,
+                if *session_present { 0x01 } else { 0x00 },
+                0x00,
+            ],
+
+            Encoder::SubAck { packet_id } => vec![
+                0x90,
+                0x03,
+                (packet_id >> 8) as u8,
+                (*packet_id & 0xFF) as u8,
+                0x00,
+            ],
+
+            Encoder::UnsubAck { packet_id } => vec![
+                0xB0,
+                0x02,
+                (packet_id >> 8) as u8,
+                (*packet_id & 0xFF) as u8,
+            ],
+
+            Encoder::PubAck { packet_id } =>  vec![
+                0x40,
+                0x02,
+                (packet_id >> 8) as u8,
+                (*packet_id & 0xFF) as u8,
+            ],
+            Encoder::PingResp => vec![0xD0, 0x00],
+
+            Encoder::Disconnect => vec![0xE0, 0x00],
+            Encoder::None => vec![]
+        }
+    }
+
+
+    pub async fn send_tcp(self, socket: &mut TcpStream) -> anyhow::Result<()> {
+        let bytes = self.to_bytes();
+        socket.write_all(&bytes).await?;
+        Ok(())
+    }
+
+   pub async fn send_ws(
+    self,
+    sender: &mut SplitSink<WebSocket, Message>,
+) -> anyhow::Result<()> {
+    let bytes = self.to_bytes();
+    sender.send(Message::Binary(bytes)).await?;
+    Ok(())
+}
+
+}
+
+
+
 pub fn encode_publish(msg: &PublishPacket) -> Vec<u8> {
     let mut out = Vec::new();
 

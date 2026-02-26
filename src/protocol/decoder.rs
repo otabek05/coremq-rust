@@ -4,7 +4,7 @@ use chrono::Local;
 use crate::{enums::packet_type::MqttPacketType, protocol::{header::Header, packets::*}};
 
 
-pub enum MqttParser {
+pub enum Decoder {
     Connect(ConnectPacket),
     Publish(PublishPacket),
     Subscribe(SubscribePacket),
@@ -13,9 +13,9 @@ pub enum MqttParser {
     Disconnect,
 }
 
-impl MqttParser {
+impl Decoder {
 
-    pub fn parse_packet(buf: &mut BytesMut) -> Option<MqttParser> {
+    pub fn parse_packet(buf: &mut BytesMut) -> Option<Decoder> {
     let original = buf.clone();
 
     let header = Header::parse(buf)?; 
@@ -31,8 +31,8 @@ impl MqttParser {
          MqttPacketType::Publish => parse_publish(header.flags, &mut body),
             MqttPacketType::Subscribe => parse_subscribe(&mut body),
             MqttPacketType::Unsubscribe => parse_unsubscribe(&mut  body),
-            MqttPacketType::PingReq => Some(MqttParser::PingReq),
-            MqttPacketType::Disconnect => Some(MqttParser::Disconnect),
+            MqttPacketType::PingReq => Some(Decoder::PingReq),
+            MqttPacketType::Disconnect => Some(Decoder::Disconnect),
         _ => None,
     }
 }
@@ -40,7 +40,7 @@ impl MqttParser {
 }
 
 
-fn parse_connect(buf: &mut BytesMut) -> Option<MqttParser> {
+fn parse_connect(buf: &mut BytesMut) -> Option<Decoder> {
     let protocol_name = read_string(buf)?;
     let protocol_level = buf.get_u8();
     match (protocol_name.as_str(), protocol_level) {
@@ -149,7 +149,7 @@ fn parse_connect(buf: &mut BytesMut) -> Option<MqttParser> {
         None
     };
 
-    Some(MqttParser::Connect(ConnectPacket {
+    Some(Decoder::Connect(ConnectPacket {
         client_id,
         keep_alive,
         clean_session,
@@ -158,7 +158,7 @@ fn parse_connect(buf: &mut BytesMut) -> Option<MqttParser> {
     }))
 }
 
-fn parse_publish(flags: u8, buf: &mut BytesMut) -> Option<MqttParser> {
+fn parse_publish(flags: u8, buf: &mut BytesMut) -> Option<Decoder> {
     let dup = (flags & 0b1000) != 0;
     let qos = (flags & 0b0110) >> 1;
     let retain = (flags & 0b0001) != 0;
@@ -177,7 +177,7 @@ fn parse_publish(flags: u8, buf: &mut BytesMut) -> Option<MqttParser> {
 
     let payload = buf.to_vec();
 
-    Some(MqttParser::Publish(PublishPacket {
+    Some(Decoder::Publish(PublishPacket {
         packet_id,
         topic,
         payload,
@@ -187,7 +187,7 @@ fn parse_publish(flags: u8, buf: &mut BytesMut) -> Option<MqttParser> {
     }))
 }
 
-fn parse_subscribe(buf: &mut BytesMut) -> Option<MqttParser> {
+fn parse_subscribe(buf: &mut BytesMut) -> Option<Decoder> {
     if buf.len() < 2 {
         return None;
     }
@@ -197,7 +197,7 @@ fn parse_subscribe(buf: &mut BytesMut) -> Option<MqttParser> {
     let topic = read_string(buf)?;
     let qos = buf.get_u8();
 
-    Some(MqttParser::Subscribe(SubscribePacket {
+    Some(Decoder::Subscribe(SubscribePacket {
         packet_id,
         topic,
         qos,
@@ -206,11 +206,11 @@ fn parse_subscribe(buf: &mut BytesMut) -> Option<MqttParser> {
 
 }
 
-fn parse_unsubscribe(buf: &mut BytesMut) -> Option<MqttParser> {
+fn parse_unsubscribe(buf: &mut BytesMut) -> Option<Decoder> {
     let packet_id = buf.get_u16();
     let topic = read_string(buf)?;
 
-    Some(MqttParser::Unsubscribe(UnsubscribePacket{
+    Some(Decoder::Unsubscribe(UnsubscribePacket{
         packet_id,
         topic
     }))
