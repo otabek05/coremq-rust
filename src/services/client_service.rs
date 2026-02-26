@@ -5,7 +5,7 @@ use tokio::sync::mpsc;
 
 use crate::{
     enums::MqttChannel,
-    models::session::Session,
+    models::{pagination::Page, session::Session},
     protocol::packets::{ConnectPacket, SubscribePacket},
 };
 
@@ -64,6 +64,35 @@ impl ClientService {
     ) {
         if let Some(mut session) = self.clients.get_mut(client_id) {
             session.remove_subscription(topic);
+        }
+    }
+
+
+    pub fn get_paginated(&self, page: usize, size: usize) -> Page<Session> {
+        let total_elements = self.clients.len();
+
+        let total_pages = if total_elements == 0 {
+            0
+        } else {
+            (total_elements + size - 1) / size
+        };
+
+        let start = page * size;
+
+        let content: Vec<Session> = self
+            .clients
+            .iter()
+            .skip(start)
+            .take(size)
+            .map(|r| r.value().clone())
+            .collect();
+
+        Page {
+            content,
+            page,
+            size,
+            total_elements,
+            total_pages,
         }
     }
 }

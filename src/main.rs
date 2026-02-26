@@ -15,7 +15,7 @@ use tower_http::cors::CorsLayer;
 use std::{ net::SocketAddr, sync::Arc};
 use tokio::{net::TcpListener, sync::mpsc};
 
-use crate::{api::{app_state::ApiState, router::RouterHandler}, engine::engine::{Engine, EngineCommand}, transport::{tcp::tcp_connection, tcp_connection}};
+use crate::{api::{app_state::ApiState, router::RouterHandler}, engine::engine::{Engine, EngineCommand}, services::ClientService, transport::{tcp::tcp_connection, tcp_connection}};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -24,7 +24,9 @@ async fn main() -> anyhow::Result<()> {
 
     let (tx, rx) = mpsc::unbounded_channel::<EngineCommand>();
 
-    let mut engine = Engine::new(rx);
+    let client_service = Arc::new(ClientService::new());
+
+    let mut engine = Engine::new(client_service.clone(), rx);
     tokio::spawn(async move {
         engine.run().await;
     });
@@ -36,14 +38,12 @@ async fn main() -> anyhow::Result<()> {
         start_mqtt_server(tx_mqtt).await;
     });
 
-    let state = ApiState{tx: tx.clone()};
+    let state = ApiState{tx: tx.clone(), client_service: client_service.clone()};
     let router  = RouterHandler::new();
     let addr = format!("{}:{}", "localhost", 18083);
     let listener = TcpListener::bind(addr.clone()).await.expect("Failed to bind address");
     println!("Admin Pannel running on {}", addr);
     axum::serve(listener, router.create_router(state)).await.unwrap();
-
-
     /*
     
     

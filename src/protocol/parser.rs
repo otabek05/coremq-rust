@@ -44,8 +44,8 @@ fn parse_connect(buf: &mut BytesMut) -> Option<MqttParser> {
     let protocol_name = read_string(buf)?;
     let protocol_level = buf.get_u8();
     match (protocol_name.as_str(), protocol_level) {
-        ("MQTT", 4) => println!("MQTT 3.1.1 client"),
-        ("MQIsdp", 3) => println!("MQTT 3.1 client"),
+        ("MQTT", 4) =>{},// println!("MQTT 3.1.1 client"),
+        ("MQIsdp", 3) => {},// println!("MQTT 3.1 client"),
         _ => {
           //  println!("Unsupported MQTT version");
             return None;

@@ -36,7 +36,7 @@ pub async fn tcp_connection(
                         if last_activity.elapsed() >= timeout_duration {
                             if let Some(ref id) = client_id {
                                 request_disconnect(&tx, &mut disconnect_requested).await;
-                                println!("Idle timeout, requesting disconnect for {}", id);
+                              //  println!("Idle timeout, requesting disconnect for {}", id);
                             }
                         }
                     }
@@ -46,7 +46,7 @@ pub async fn tcp_connection(
                             Ok(0) => {
                                 if let Some(ref id) = client_id {
                                     request_disconnect(&tx, &mut disconnect_requested).await;
-                                    println!("Socket closed by client {}, requesting disconnect", id);
+                                   // println!("Socket closed by client {}, requesting disconnect", id);
                                 }
                                 break;
                             }
@@ -112,7 +112,7 @@ pub async fn tcp_connection(
                             }
 
                             Err(err) => {
-                                eprintln!("Socket read error: {:?}", err);
+                             //   eprintln!("Socket read error: {:?}", err);
                                 if let Some(ref id) = client_id {
                                     request_disconnect(&tx, &mut disconnect_requested).await;
                                 }
@@ -127,7 +127,7 @@ pub async fn tcp_connection(
                             Some(MqttChannel::Disconnect) => {
                                 if let Some(ref id) = client_id {
                                     let _ =  engine_tx.send(EngineCommand::Disconnect(id.clone())).unwrap();
-                                    println!("Disconnect received, cleaning client: {}", id);
+                                   // println!("Disconnect received, cleaning client: {}", id);
                                 }
                                 break;
                             }
@@ -136,7 +136,7 @@ pub async fn tcp_connection(
                                 if publish(&mut socket, packet).await.is_err() {
                                     if let Some(ref id) = client_id {
                                         request_disconnect(&tx, &mut disconnect_requested).await;
-                                        println!("Failed to publish to {}, requesting disconnect", id);
+                                      //  println!("Failed to publish to {}, requesting disconnect", id);
                                     }
                                 }
                             }
@@ -155,7 +155,7 @@ pub async fn tcp_connection(
     if let Some(id) = client_id {
         let _ =  engine_tx.send(EngineCommand::Disconnect(id.clone())).unwrap();
         //    engine.drop_client(&id).await;
-        println!("Cleanup complete for client: {}", id);
+       // println!("Cleanup complete for client: {}", id);
     }
 
     Ok(())

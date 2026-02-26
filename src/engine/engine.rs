@@ -1,5 +1,6 @@
-use std::sync::Arc;
+
 use tokio::sync::{mpsc, oneshot};
+use std::sync::Arc;
 
 pub enum EngineCommand {
     Connect(ConnectPacket, mpsc::Sender<MqttChannel>),
@@ -7,26 +8,29 @@ pub enum EngineCommand {
     Subscribe(SubscribePacket, String),
     Unsubscribe(UnsubscribePacket, String),
     Publish(PublishPacket),
-    GetClients(oneshot::Sender<Vec<Session>>)
+    GetClients(oneshot::Sender<Page<Session>>, usize, usize)
 }
 
 use crate::{
     enums::MqttChannel,
-    models::session::Session,
+    models::{pagination::Page, session::Session},
     protocol::{packets::{ConnectPacket, PublishPacket, SubscribePacket, UnsubscribePacket}, parser::MqttParser},
     services::{ClientService, TopicService},
+
 };
 
 pub struct Engine {
-    client_service: ClientService,
+    client_service: Arc<ClientService>,
     topic_service: TopicService,
     rx: mpsc::UnboundedReceiver<EngineCommand>,
 }
 
 impl Engine {
-    pub fn new(rx: mpsc::UnboundedReceiver<EngineCommand>) -> Self {
+    pub fn new(
+        client_service: Arc<ClientService>,
+        rx: mpsc::UnboundedReceiver<EngineCommand>) -> Self {
         Self {
-            client_service: ClientService::new(),
+            client_service,
             topic_service: TopicService::new(),
             rx,
         }
@@ -50,6 +54,12 @@ impl Engine {
     pub fn get_clients(&self) -> Vec<Session> {
         self.client_service.get_all()
     }
+
+
+    pub fn get_paginated(&self, page: usize, size: usize) -> Page<Session> {
+      self.client_service.get_paginated(page, size)
+    }
+
 }
 
 impl Engine {
@@ -86,8 +96,8 @@ impl Engine {
                     self.topic_service.unsubscribe(&packet.topic,& client_id);
                 }
 
-                EngineCommand::GetClients(reply_tx) => {
-                    let clients = self.get_clients();
+                EngineCommand::GetClients(reply_tx, page, size) => {
+                    let clients = self.get_paginated(page, size);
                     let _ = reply_tx.send(clients);
                 }
             }

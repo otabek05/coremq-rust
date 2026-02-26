@@ -1,6 +1,12 @@
 use axum::{response::Json, extract::State};
 
-use crate::{api::app_state::ApiState, engine::engine::EngineCommand, models::session::Session};
+use crate::{
+     engine::engine::EngineCommand,
+    api::app_state::ApiState, models::{pagination::Page, session::Session}
+};
+
+use tokio::sync::{oneshot};
+use axum::http::StatusCode;
 
 /*
 
@@ -10,22 +16,27 @@ pub async fn list(State(state): State<ApiState> ) -> Json<Vec<Session>> {
 }
 */
 
-use tokio::sync::{mpsc, oneshot};
+
 
 pub async fn get_clients(
     State(state): State<ApiState>,
-) -> Json<Vec<String>> {
-    let (reply_tx, reply_rx) = oneshot::channel();
+) -> Result<Json<Page<Session>>, StatusCode> {
 
-    state.tx.send(EngineCommand::GetClients(reply_tx)).unwrap();
+ //   let (reply_tx, reply_rx) = oneshot::channel();
 
-    let sessions = reply_rx.await.unwrap();
+    /*
+     
+    // Send command to engine
+    state
+        .tx
+        .send(EngineCommand::GetClients(reply_tx, 0, 10))
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
-    // Return only client IDs for example
-    let client_ids = sessions
-        .into_iter()
-        .map(|s| s.client_id)
-        .collect();
-
-    Json(client_ids)
+    // Await engine response
+    let sessions = reply_rx
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+*/
+    let page = state.client_service.get_paginated(0, 10);
+    Ok(Json(page))
 }
