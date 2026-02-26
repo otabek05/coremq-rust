@@ -70,7 +70,6 @@ async fn main() -> anyhow::Result<()> {
             .unwrap();
     });
 
-    // Start HTTP Admin API
     let state = ApiState{
         tx: admin_tx.clone(),
     };
