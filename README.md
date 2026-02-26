@@ -156,7 +156,7 @@ All transports interact with a single shared broker core.
 ## 🛠️ Installation
 
 ```bash
-git clone https://github.com/yourusername/coremq.git
+git clone https://github.com/otabek05/coremq.git
 cd coremq
 cargo build --release
 ```
