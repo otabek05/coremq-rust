@@ -85,7 +85,6 @@ impl Engine {
                             self.client_service.add_client(&packet, tx);
                         }
                         ConnectCommand::Disconnect(client_id) => {
-                         //   println!("Client removing from engine: {}", client_id);
                             self.drop_client(&client_id);
                         }
                     }

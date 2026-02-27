@@ -1,8 +1,10 @@
 use crate::protocol::packets::PublishPacket;
 
-pub mod packet_type;
+pub mod packet;
+pub mod jwt;
+pub mod role;
 
 pub enum MqttChannel {
     Publish(PublishPacket),
-    Disconnect, // Explicit signal to close connection
+    Disconnect,
 }

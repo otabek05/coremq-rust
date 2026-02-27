@@ -19,3 +19,6 @@ bytes = "1"
 anyhow = "1.0.101"
 
 dashmap = "5"
+
+jsonwebtoken = "9"
+casbin = "2.20.0"

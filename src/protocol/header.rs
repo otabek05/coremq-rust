@@ -1,6 +1,6 @@
 use bytes::{Buf, BytesMut};
 
-use crate::{enums::packet_type::MqttPacketType};
+use crate::{enums::packet::MqttPacketType};
 
 pub struct Header {
     pub packet_type: MqttPacketType,

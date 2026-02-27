@@ -1,7 +1,7 @@
 use bytes::{Buf, BytesMut};
 use chrono::Local;
 
-use crate::{enums::packet_type::MqttPacketType, protocol::{header::Header, packets::*}};
+use crate::{enums::packet::MqttPacketType, protocol::{header::Header, packets::*}};
 
 
 pub enum Decoder {
