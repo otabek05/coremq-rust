@@ -3,7 +3,6 @@ use chrono::Local;
 
 use crate::{enums::packet::MqttPacketType, protocol::{header::Header, packets::*}};
 
-
 pub enum Decoder {
     Connect(ConnectPacket),
     Publish(PublishPacket),
