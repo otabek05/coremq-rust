@@ -5,9 +5,7 @@ use tokio::{net::TcpListener, sync::watch, task::JoinHandle};
 use tower_http::cors::CorsLayer;
 
 use crate::{
-    engine::Engine,
-    models::config::Protocol,
-    transport::{ProtocolState, tcp::tcp_connection, ws::{WsState, ws_handler}},
+    engine::Engine, enums::protocol::ProtocolType, transport::{ProtocolState, tcp::tcp_connection, ws::{WsState, ws_handler}}
 };
 
 impl Engine {
@@ -40,7 +38,7 @@ impl Engine {
             engine: state.clone(),
             port: port
         };
-        
+
         let addr: SocketAddr = format!("0.0.0.0:{}", port).parse().unwrap();
         let app = Router::new()
             .route("/mqtt", get(ws_handler))
@@ -75,10 +73,10 @@ impl Engine {
 
             // spawn the worker
             let handle: JoinHandle<()> = match port_cfg.protocol {
-                Protocol::Tcp => tokio::spawn(async move {
+                ProtocolType::Tcp => tokio::spawn(async move {
                     Engine::tcp_worker(port_num, state_clone, rx).await;
                 }),
-                Protocol::Ws => tokio::spawn(async move {
+                ProtocolType::Ws => tokio::spawn(async move {
                     Engine::ws_worker(port_num, state_clone, rx).await;
                 }),
                 _ => continue, 

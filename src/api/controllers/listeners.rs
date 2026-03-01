@@ -1,7 +1,7 @@
 use axum::{Json, extract::{Path, State}, http::StatusCode};
 use tokio::sync::oneshot;
 
-use crate::{api::api_state::ApiState, engine::AdminCommand, models::{config::ListenerConfig, listener}};
+use crate::{api::api_state::ApiState, engine::AdminCommand, models::listener::ListenerConfig};
 
 pub async  fn get_listeners(
     State(state): State<ApiState>
@@ -15,11 +15,8 @@ pub async  fn get_listeners(
 
 pub async  fn stop_listener(
     Path(port): Path<u16>,
-   // Json(payload): Json<listener::StopListener>,
     State(state): State<ApiState>
 ) -> Result<Json<String>, StatusCode> {
-   // let (reply_tx, reply_rx) = oneshot::channel();
     state.tx.send(AdminCommand::StopListener(port)).map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
-    
     Ok(Json(String::from("successfully stopped")))
 }

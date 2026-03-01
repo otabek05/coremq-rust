@@ -2,7 +2,7 @@ use tokio::sync::{mpsc, oneshot};
 
 use crate::{
     enums::MqttChannel, 
-    models::{config::ListenerConfig, pagination::Page, session::Session}, 
+    models::{ listener::ListenerConfig, pagination::Page, session::Session}, 
     protocol::packets::{ConnectPacket, PublishPacket, SubscribePacket, UnsubscribePacket}
 };
 

@@ -3,7 +3,7 @@ use tokio::{sync::watch, task::JoinHandle};
 
 
 use crate::{
-    engine::{AdminCommand, ConnectCommand, EngineChannels, PubSubCommand}, enums::MqttChannel, models::{config::{Config, ListenerConfig}, pagination::Page, session::Session}, protocol::packets::PublishPacket, services::{ClientService, TopicService}
+    engine::{AdminCommand, ConnectCommand, EngineChannels, PubSubCommand}, enums::MqttChannel, models::{config::Config, listener::ListenerConfig, pagination::Page, session::Session}, protocol::packets::PublishPacket, services::{ClientService, TopicService}
 };
 
 pub struct Engine {
