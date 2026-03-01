@@ -25,15 +25,22 @@ use crate::{
     transport::ProtocolState,
 };
 
-pub async fn ws_handler(
-    ws: WebSocketUpgrade,
-    State(engine): State<Arc<ProtocolState>>,
-) -> impl IntoResponse {
-    ws.protocols(["mqtt"])
-        .on_upgrade(move |socket| handle_socket(socket, engine))
+
+#[derive(Clone)]
+pub struct WsState {
+    pub engine: Arc<ProtocolState>,
+    pub port: u16,
 }
 
-async fn handle_socket(socket: WebSocket, state: Arc<ProtocolState>) {
+pub async fn ws_handler(
+    ws: WebSocketUpgrade,
+    State(state): State<WsState>
+) -> impl IntoResponse {
+    ws.protocols(["mqtt"])
+        .on_upgrade(move |socket| handle_socket(socket, state))
+}
+
+async fn handle_socket(socket: WebSocket, state: WsState) {
     println!("Client connected via WebSocket");
 
     let (tx, mut rx) = mpsc::channel::<MqttChannel>(32);
@@ -72,7 +79,7 @@ async fn handle_socket(socket: WebSocket, state: Arc<ProtocolState>) {
                                         Decoder::Connect(p) => {
                                             client_id = Some(p.client_id.clone());
                                             timeout_duration = Duration::from_secs((p.keep_alive as u64) * 3 / 2);
-                                            if let Err(e) =  state.connect_tx.send(ConnectCommand::Connect(p.clone(), tx.clone() )) {
+                                            if let Err(e) =  state.engine.connect_tx.send(ConnectCommand::Connect(p.clone(), state.port,  tx.clone() )) {
                                                 println!("Error connecting:  {}", e);
                                             }
                                             Encoder::ConnAck {session_present: false, }
@@ -91,7 +98,7 @@ async fn handle_socket(socket: WebSocket, state: Arc<ProtocolState>) {
 
                                         Decoder::Publish(p) => {
                                             last_activity = Instant::now();
-                                           if  let  Err(e) = state.pubsub_tx.send(PubSubCommand::Publish(p.clone())) {
+                                           if  let  Err(e) = state.engine.pubsub_tx.send(PubSubCommand::Publish(p.clone())) {
                                               println!("Error publishing: {}", e);
                                            }
                                             match p.packet_id {
@@ -103,7 +110,7 @@ async fn handle_socket(socket: WebSocket, state: Arc<ProtocolState>) {
 
                                         Decoder::Subscribe(p) => {
                                             if let Some(ref id) = client_id {
-                                                 let _ = state.pubsub_tx.send(PubSubCommand::Subscribe(p.clone(), id.clone()));
+                                                 let _ = state.engine.pubsub_tx.send(PubSubCommand::Subscribe(p.clone(), id.clone()));
                                             }
 
                                             Encoder::SubAck { packet_id: p.packet_id }
@@ -111,7 +118,7 @@ async fn handle_socket(socket: WebSocket, state: Arc<ProtocolState>) {
 
                                         Decoder::Unsubscribe(p) =>{
                                             if let Some(ref id) = client_id {
-                                                let _ = state.pubsub_tx.send(PubSubCommand::Unsubscribe(p.clone(), id.clone()));
+                                                let _ = state.engine.pubsub_tx.send(PubSubCommand::Unsubscribe(p.clone(), id.clone()));
                                             }
 
                                             Encoder::UnsubAck { packet_id: p.packet_id }
@@ -153,7 +160,7 @@ async fn handle_socket(socket: WebSocket, state: Arc<ProtocolState>) {
 
                     Some(MqttChannel::Disconnect) => {
                           if let Some(ref id) = client_id {
-                                    let _ =  state.connect_tx.send(ConnectCommand::Disconnect(id.clone())).unwrap();
+                                    let _ =  state.engine.connect_tx.send(ConnectCommand::Disconnect(id.clone())).unwrap();
                         }
                         break;
                     }
@@ -170,6 +177,7 @@ async fn handle_socket(socket: WebSocket, state: Arc<ProtocolState>) {
 
     if let Some(id) = client_id {
         let _ = state
+        .engine
             .connect_tx
             .send(ConnectCommand::Disconnect(id.clone()))
             .unwrap();

@@ -1,8 +1,8 @@
-use axum::{Router, http::StatusCode, response::Html, routing::get};
+use axum::{Router, http::StatusCode, response::Html, routing::{delete, get}};
 use tower_http::cors::{Any, CorsLayer};
 
 
-use crate::api::{ api_state::ApiState, controllers::clients};
+use crate::api::{ api_state::ApiState, controllers::{clients, listeners}};
 
 pub struct  RouterHandler {}
 
@@ -14,6 +14,8 @@ impl RouterHandler  {
     pub fn create_router(&self, state: ApiState) -> Router {
         Router::new()
         .nest("/api/v1", self.get_client_routes())
+        .route("/api/v1/listeners", get(listeners::get_listeners))
+        .route("/api/v1/listeners/:port", delete(listeners::stop_listener))
         .fallback(not_found)
         .layer(self.cors())
         .with_state(state)

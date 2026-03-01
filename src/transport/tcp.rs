@@ -14,8 +14,7 @@ use crate::{
 pub async fn tcp_connection(
     mut socket: TcpStream,
     state: Arc<ProtocolState>,
-   // connect_tx: mpsc::UnboundedSender<ConnectCommand>,
-  //  pubsub_tx: mpsc::UnboundedSender<PubSubCommand>,
+    connected_port: u16,
 ) -> anyhow::Result<()> {
     let (tx, mut rx) = mpsc::channel::<MqttChannel>(2048);
     let mut buffer = BytesMut::with_capacity(4096);
@@ -56,7 +55,7 @@ pub async fn tcp_connection(
                                         Decoder::Connect(p) => {
                                             client_id = Some(p.client_id.clone());
                                             timeout_duration = Duration::from_secs((p.keep_alive as u64) * 3 / 2);
-                                            if let Err(e) =  state.connect_tx.send(ConnectCommand::Connect(p.clone(), tx.clone() )) {
+                                            if let Err(e) =  state.connect_tx.send(ConnectCommand::Connect(p.clone(), connected_port,  tx.clone() )) {
                                                 println!("Error connecting:  {}", e);
                                             }
                                             Encoder::ConnAck {session_present: false, }

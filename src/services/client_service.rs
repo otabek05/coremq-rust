@@ -1,5 +1,3 @@
-
-
 use dashmap::DashMap;
 use tokio::sync::mpsc;
 
@@ -23,12 +21,14 @@ impl ClientService {
     pub fn add_client(
         &self,
         packet: &ConnectPacket,
+        connected_port: u16,
         tx: mpsc::Sender<MqttChannel>,
     ) {
         let session = Session::new(
             packet.client_id.clone(),
             packet.username.clone().unwrap_or_default(),
             packet.clean_session,
+            connected_port,
             tx,
         );
 
@@ -43,26 +43,25 @@ impl ClientService {
         self.clients.get(key).map(|r| r.value().clone())
     }
 
-    pub fn add_subscribtion(
-        &self,
-        client_id: &str,
-        sub: &SubscribePacket,
-    ) {
+    pub fn add_subscribtion(&self, client_id: &str, sub: &SubscribePacket) {
         if let Some(mut session) = self.clients.get_mut(client_id) {
             session.add_subscription(sub.clone());
         }
     }
 
-    pub fn remove_subscribtion(
-        &self,
-        client_id: &str,
-        topic: &str,
-    ) {
+    pub fn remove_subscribtion(&self, client_id: &str, topic: &str) {
         if let Some(mut session) = self.clients.get_mut(client_id) {
             session.remove_subscription(topic);
         }
     }
 
+    pub fn get_by_listener(&self, port: u16) -> Vec<Session> {
+        self.clients
+            .iter()
+            .filter(|entry| entry.value().connected_port == port)
+            .map(|entry| entry.value().clone())
+            .collect()
+    }
 
     pub fn get_paginated(&self, page: usize, size: usize) -> Page<Session> {
         let total_elements = self.clients.len();

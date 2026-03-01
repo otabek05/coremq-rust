@@ -2,7 +2,7 @@ use axum::{response::Json, extract::State};
 
 use crate::{
 
-  api::api_state::ApiState, engine::AdminCommand, models::{pagination::Page, session::Session}
+  api::api_state::ApiState, engine::AdminCommand, models::{config::ListenerConfig, pagination::Page, session::Session}
 };
 
 use tokio::sync::{oneshot};
@@ -25,3 +25,4 @@ pub async fn get_clients(
 
     Ok(Json(sessions))
 }
+

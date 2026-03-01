@@ -14,7 +14,8 @@ pub struct Session {
     pub client_id: String,
     pub username: String,
     pub clean_session: bool,
-    
+    pub connected_port: u16,
+
     #[serde(serialize_with = "format_datetime")]
     pub connected_at: DateTime<Local>,
     pub subscriptions: HashMap<String, SubscribePacket>,
@@ -28,12 +29,14 @@ impl Session {
         client_id: String,
         username: String,
         clean_session: bool,
+        connected_port: u16,
         tx: mpsc::Sender<MqttChannel>,
     ) -> Self {
         Self {
             client_id,
             username,
             clean_session,
+            connected_port,
             connected_at: Local::now(),
             subscriptions: HashMap::new(),
             tx,

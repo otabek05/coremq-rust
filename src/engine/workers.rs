@@ -6,8 +6,8 @@ use tower_http::cors::CorsLayer;
 
 use crate::{
     engine::Engine,
-    models::config::{ Protocol},
-    transport::{ProtocolState, tcp::tcp_connection, ws::ws_handler},
+    models::config::Protocol,
+    transport::{ProtocolState, tcp::tcp_connection, ws::{WsState, ws_handler}},
 };
 
 impl Engine {
@@ -19,10 +19,10 @@ impl Engine {
         loop {
             tokio::select! {
                 res = listener.accept() => {
-                    let (socket, addr) = res.unwrap();
+                    let (socket, _) = res.unwrap();
                     let state_clone = state.clone();
                     tokio::spawn(async move {
-                        if let Err(e) = tcp_connection(socket, state_clone).await {
+                        if let Err(e) = tcp_connection(socket, state_clone, port).await {
                             println!("TCP connection error: {}", e);
                         }
                     });
@@ -36,10 +36,15 @@ impl Engine {
     }
 
     async fn ws_worker(port: u16, state: Arc<ProtocolState>, mut stop_rx: watch::Receiver<bool>) {
+        let ws_state = WsState{
+            engine: state.clone(),
+            port: port
+        };
+        
         let addr: SocketAddr = format!("0.0.0.0:{}", port).parse().unwrap();
         let app = Router::new()
             .route("/mqtt", get(ws_handler))
-            .with_state(state.clone())
+            .with_state(ws_state.clone())
             .layer(CorsLayer::permissive());
 
         let server = axum::serve(tokio::net::TcpListener::bind(addr).await.unwrap(), app);
@@ -79,12 +84,12 @@ impl Engine {
                 _ => continue, 
             };
 
-            self.listeners.insert(port_num, (handle, tx));
+            self.listeners.insert(port_num, (handle, tx, port_cfg.clone()));
         }
     }
 
-    pub async fn stop_listener(&mut self, port: u16) {
-        if let Some((handle, stop_tx)) = self.listeners.remove(&port) {
+    pub async fn stop_listener(&mut self, port: u16)  {
+        if let Some((handle, stop_tx, _)) = self.listeners.remove(&port) {
             stop_tx.send(true).unwrap();
             handle.await.unwrap();
             println!("Stopped listener on port {}", port);

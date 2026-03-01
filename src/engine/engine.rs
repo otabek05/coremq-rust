@@ -3,14 +3,14 @@ use tokio::{sync::watch, task::JoinHandle};
 
 
 use crate::{
-    engine::{AdminCommand, ConnectCommand, EngineChannels, PubSubCommand}, enums::MqttChannel, models::{config::Config, pagination::Page, session::Session}, protocol::packets::PublishPacket, services::{ClientService, TopicService}
+    engine::{AdminCommand, ConnectCommand, EngineChannels, PubSubCommand}, enums::MqttChannel, models::{config::{Config, ListenerConfig}, pagination::Page, session::Session}, protocol::packets::PublishPacket, services::{ClientService, TopicService}
 };
 
 pub struct Engine {
     client_service: Arc<ClientService>,
     topic_service: TopicService,
     channels: EngineChannels,
-   pub listeners: HashMap<u16, (JoinHandle<()>, watch::Sender<bool>)>,
+   pub listeners: HashMap<u16, (JoinHandle<()>, watch::Sender<bool>, ListenerConfig)>,
    pub config: Config,
 }
 
@@ -49,12 +49,16 @@ impl Engine {
         self.client_service.get_paginated(page, size)
     }
 
+    pub fn get_listeners(&self) -> Vec<ListenerConfig> {
+        self.listeners.values().map(| (_, _, config) | config.clone()).collect()
+    }
+
     pub async fn run(&mut self) {
         loop {
             tokio::select! {
                 Some(cmd) = self.channels.connect_rx.recv() => {
                     match cmd {
-                        ConnectCommand::Connect(packet, tx) => {
+                        ConnectCommand::Connect(packet, port,  tx) => {
                             let old_session = self.client_service.remove_client(&packet.client_id);
                             if let Some(session) = old_session {
                                 self.topic_service.remove_client(&session.client_id);
@@ -63,7 +67,7 @@ impl Engine {
 
                             println!("Clinet connected: {:?}", packet);
 
-                            self.client_service.add_client(&packet, tx);
+                            self.client_service.add_client(&packet, port, tx);
                         }
                         ConnectCommand::Disconnect(client_id) => {
                             self.drop_client(&client_id);
@@ -92,6 +96,20 @@ impl Engine {
                         AdminCommand::GetClients(reply_tx, page, size) => {
                             let clients = self.get_paginated(page, size);
                             let _ = reply_tx.send(clients);
+                        }
+
+                        AdminCommand::StopListener(port) => {
+                           let sessions = self.client_service.get_by_listener(port);
+                           for s in sessions {
+                             self.drop_client(&s.client_id);
+                           }
+                           
+                           self.stop_listener(port).await;
+                        }
+
+                        AdminCommand::GetListeners(reply_tx) => {
+                            let listeners = self.get_listeners();
+                            let _ = reply_tx.send(listeners);
                         }
                     }
                 }
