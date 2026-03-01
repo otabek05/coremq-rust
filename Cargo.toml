@@ -5,6 +5,7 @@ edition = "2024"
 
 [dependencies]
 tokio = { version = "1", features = ["full"] }
+tokio-util = "0.7"
 axum = { version = "0.7", features = ["ws", "macros"] }
 tower = "0.4"
 tower-http = { version = "0.5", features = ["cors", "trace"] }

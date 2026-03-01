@@ -1,51 +1,32 @@
+use std::{collections::HashMap, sync::Arc};
+use tokio::{sync::watch, task::JoinHandle};
 
-
-use tokio::sync::{mpsc, oneshot};
-use std::sync::Arc;
 
 use crate::{
-    enums::MqttChannel,
-    models::{pagination::Page, session::Session},
-    protocol::packets::{ConnectPacket, PublishPacket, SubscribePacket, UnsubscribePacket},
-    services::{ClientService, TopicService},
+    engine::{AdminCommand, ConnectCommand, EngineChannels, PubSubCommand}, enums::MqttChannel, models::{config::Config, pagination::Page, session::Session}, protocol::packets::PublishPacket, services::{ClientService, TopicService}
 };
-
-pub enum ConnectCommand {
-    Connect(ConnectPacket, mpsc::Sender<MqttChannel>),
-    Disconnect(String),
-}
-
-pub enum PubSubCommand {
-    Subscribe(SubscribePacket, String),
-    Unsubscribe(UnsubscribePacket, String),
-    Publish(PublishPacket),
-}
-
-pub enum AdminCommand {
-    GetClients(oneshot::Sender<Page<Session>>, usize, usize),
-}
-
-pub struct EngineChannels {
-    pub connect_rx: mpsc::UnboundedReceiver<ConnectCommand>,
-    pub pubsub_rx: mpsc::UnboundedReceiver<PubSubCommand>,
-    pub admin_rx: mpsc::UnboundedReceiver<AdminCommand>,
-}
 
 pub struct Engine {
     client_service: Arc<ClientService>,
     topic_service: TopicService,
     channels: EngineChannels,
+   pub listeners: HashMap<u16, (JoinHandle<()>, watch::Sender<bool>)>,
+   pub config: Config,
 }
 
 impl Engine {
     pub fn new(
         client_service: Arc<ClientService>,
+        config: Config,
         channels: EngineChannels,
     ) -> Self {
         Self {
-            client_service,
             topic_service: TopicService::new(),
+            listeners: HashMap::new(),
+            client_service,
             channels,
+            config: config,
+
         }
     }
 

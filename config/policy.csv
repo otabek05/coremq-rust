@@ -1,0 +1,12 @@
+# Policies for users
+p, alice, /read, GET
+p, alice, /write, POST
+p, bob, /read, GET
+p, admin, /admin, GET
+p, admin, /admin, POST
+
+# Public access
+p, public, /public, GET
+
+# Role assignments
+g, alice, admin
