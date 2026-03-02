@@ -14,7 +14,7 @@ use std::{net::SocketAddr, sync::Arc};
 use tokio::{net::TcpListener, sync::mpsc};
 
 use crate::{
-    api::{api_state::ApiState, router::RouterHandler}, engine::{AdminCommand, ConnectCommand, Engine, EngineChannels, PubSubCommand}, services::{ClientService, jwt_service::{self, JwtService}}, transport::{ProtocolState, tcp::tcp_connection, ws::ws_handler}
+    api::{api_state::ApiState, router::RouterHandler}, engine::{AdminCommand, ConnectCommand, Engine, EngineChannels, PubSubCommand}, services::{ClientService, jwt_service::{self, JwtService}}, storage::redb::Storage, transport::{ProtocolState, tcp::tcp_connection, ws::ws_handler}
 };
 
 #[tokio::main]
@@ -32,9 +32,17 @@ async fn main() -> anyhow::Result<()> {
         Err(e) => { panic!("Failed to create enforcer: {}", e)}
     };
 
+    let path = r"C:\Users\unknown\coremq-rust\coremq.redb";
+    let db = match pkg::db::new(path) {
+        Ok(db) => db,
+        Err(e) => { panic!("Failed to create database: {}", e)}
+    };
+
     let client_service = Arc::new(ClientService::new());
     let jwt_service = Arc::new(JwtService::new(&config.middleware));
     let enforcer = Arc::new(enforcer);
+    let db_arc = Arc::new(db);
+    let storage = Arc::new(Storage::new(db_arc));
 
     let (connect_tx, connect_rx) = mpsc::unbounded_channel::<ConnectCommand>();
     let (pubsub_tx, pubsub_rx) = mpsc::unbounded_channel::<PubSubCommand>();
@@ -46,7 +54,7 @@ async fn main() -> anyhow::Result<()> {
         admin_rx,
     };
 
-     let engine_channels = Arc::new(ProtocolState {
+    let engine_channels = Arc::new(ProtocolState {
         connect_tx: connect_tx.clone(),
         pubsub_tx: pubsub_tx.clone(),
     });
@@ -61,7 +69,8 @@ async fn main() -> anyhow::Result<()> {
     let state = ApiState {
         jwt_service: jwt_service.clone(),
         enforcer: enforcer.clone(),
-        tx: admin_tx.clone(),
+        engine: admin_tx.clone(),
+        storage: storage.clone()
     };
 
     let router = RouterHandler::new();

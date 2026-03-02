@@ -1,7 +1,7 @@
 use chrono::{Duration, Utc};
 use jsonwebtoken::{Algorithm, DecodingKey, EncodingKey, Header, Validation, decode, encode, errors::Error};
 
-use crate::{enums::{jwt::JwtType, role::RoleType}, models::{claims::{self, Claims}, config, login::Token}};
+use crate::{enums::{jwt::JwtType, role::RoleType}, models::{claims::{self, Claims}, config, login::Token, user}};
 
 
 
@@ -25,9 +25,9 @@ impl JwtService {
         }
     }
 
-    pub fn generate(&self, user_id: u64, role:RoleType) -> Result<Token, Error> {
-        let access_token = self.generate_token(user_id, JwtType::AccessToken, 3600, &role)?;
-        let refresh_token = self.generate_token(user_id, JwtType::RefreshToken, 6200, &role)?;
+    pub fn generate(&self, username: String, role:RoleType) -> Result<Token, Error> {
+        let access_token = self.generate_token(username.clone(), JwtType::AccessToken, 3600, &role)?;
+        let refresh_token = self.generate_token(username.clone(), JwtType::RefreshToken, 6200, &role)?;
         Ok(Token{
             access_token, refresh_token
         })
@@ -39,10 +39,10 @@ impl JwtService {
     }
 
 
-    fn generate_token(&self, user_id:u64, token_type:JwtType, ttl:i64, role:&RoleType) -> Result<String, Error> {
+    fn generate_token(&self, username:String, token_type:JwtType, ttl:i64, role:&RoleType) -> Result<String, Error> {
         let now = Utc::now();
         let claims = Claims{
-            sub: user_id.to_string(),
+            sub: username,
             iat:now.timestamp() as usize,
             role: role.to_string(),
             exp: (now + Duration::seconds(ttl)).timestamp() as usize,

@@ -15,7 +15,7 @@ pub async fn get_clients(
     let (reply_tx, reply_rx) = oneshot::channel();
 
     state
-        .tx
+        .engine
         .send(AdminCommand::GetClients(reply_tx, 0, 10))
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 

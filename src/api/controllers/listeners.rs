@@ -7,7 +7,7 @@ pub async  fn get_listeners(
     State(state): State<ApiState>
 ) -> Result<Json<Vec<ListenerConfig>>, StatusCode> {
     let (reply_tx, reply_rx) = oneshot::channel();
-    state.tx.send(AdminCommand::GetListeners(reply_tx)).map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    state.engine.send(AdminCommand::GetListeners(reply_tx)).map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
     let listeners = reply_rx.await.map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
     Ok(Json(listeners))
@@ -17,6 +17,6 @@ pub async  fn stop_listener(
     Path(port): Path<u16>,
     State(state): State<ApiState>
 ) -> Result<Json<String>, StatusCode> {
-    state.tx.send(AdminCommand::StopListener(port)).map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    state.engine.send(AdminCommand::StopListener(port)).map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
     Ok(Json(String::from("successfully stopped")))
 }

@@ -13,3 +13,8 @@ impl ReDB {
         Ok(Self { db: Arc::new(db) })
     }
 }
+
+pub fn new(path: &str) -> anyhow::Result<Database> {
+    let db = Database::create(path)?;
+    Ok(db)
+}

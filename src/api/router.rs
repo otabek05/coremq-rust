@@ -1,8 +1,8 @@
-use axum::{Router, http::StatusCode, response::Html, routing::{delete, get}};
+use axum::{Router, http::StatusCode, response::Html, routing::{delete, get, post}};
 use tower_http::cors::{Any, CorsLayer};
 
 
-use crate::api::{ api_state::ApiState, controllers::{clients, listeners}};
+use crate::api::{ api_state::ApiState, controllers::{clients, listeners, users}};
 
 pub struct  RouterHandler {}
 
@@ -13,7 +13,9 @@ impl RouterHandler  {
 
     pub fn create_router(&self, state: ApiState) -> Router {
         Router::new()
-        .nest("/api/v1", self.get_client_routes())
+        .nest("/api/v1", self.get_session_routes())
+        .nest("/api/v1", self.get_user_routes())
+        .nest("/api/v1/public", self.auth_routes())
         .route("/api/v1/listeners", get(listeners::get_listeners))
         .route("/api/v1/listeners/:port", delete(listeners::stop_listener))
         .fallback(not_found)
@@ -22,10 +24,19 @@ impl RouterHandler  {
         
     }
 
-
-    pub fn get_client_routes(&self) -> Router<ApiState> {
+    pub fn auth_routes(&self) -> Router<ApiState> {
         Router::new()
-        .route("/clients", get(clients::get_clients))
+        .route("/login", post(users::login))
+    }
+
+    pub fn get_session_routes(&self) -> Router<ApiState> {
+        Router::new()
+        .route("/sessions", get(clients::get_clients))
+    }
+
+    pub fn get_user_routes(&self) -> Router<ApiState> {
+        Router::new()
+        .route("/users", post(users::create_user).get(users::get_all_users) )
     }
 
      fn cors(&self) -> CorsLayer {
