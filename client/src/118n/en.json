@@ -1,0 +1,54 @@
+{
+  "welcome": "Welcome",
+  "logout": "Logout",
+  "need_help": "Need help?",
+
+  "nav": {
+    "home": "Home",
+    "sessions": "Sessions",
+    "listeners": "Listeners",
+    "admin": "Admin",
+    "webhook": "Webhook",
+    "websocket": "Websocket"
+  },
+
+   "sessions": {
+    "title": "Sessions",
+    "search": "Search",
+    "refresh": "Refresh",
+    "clientId": "Client ID",
+    "username": "Username",
+    "remoteAddress": "Remote Address",
+    "port": "Port",
+    "connectedAt": "Connected At",
+    "subscriptions": "Subscriptions",
+    "actions": "Actions",
+    "id": "ID"
+  },
+
+
+   "websocket": {
+    "title": "MQTT WebSocket Client",
+    "url": "URL",
+    "port": "Port",
+    "path": "Path",
+    "protocol": "Protocol",
+    "username": "Username",
+    "password": "Password",
+    "clientId": "Client ID",
+    "connect": "Connect",
+    "disconnect": "Disconnect",
+    "publish": "Publish",
+    "subscribe": "Subscribe",
+    "add": "Add",
+    "remove": "Remove",
+    "topic": "Topic",
+    "message": "Message",
+    "qos": "QoS",
+    "clear": "Clear",
+    "publishConsole": "Publish Console",
+    "subscribeConsole": "Subscribe Console",
+    "subscribed": "Subscribed to",
+    "unsubscribed": "Unsubscribed from"
+  }
+}

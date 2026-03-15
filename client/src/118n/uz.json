@@ -1,0 +1,52 @@
+{
+  "welcome": "Xush kelibsiz",
+  "logout": "Chiqish",
+  "need_help": "Yordam kerakmi?",
+   "nav": {
+    "home": "Bosh sahifa",
+    "clients": "Mijozlar",
+    "listeners": "Tinglovchilar",
+    "admin": "Admin",
+    "webhook": "Webhook",
+    "websocket": "Websocket"
+  },
+
+   "sessions": {
+    "title": "Sessiyalar",
+    "search": "Qidirish",
+    "refresh": "Yangilash",
+    "clientId": "Client ID",
+    "username": "Foydalanuvchi",
+    "remoteAddress": "Manzil",
+    "port": "Port",
+    "connectedAt": "Ulangan vaqt",
+    "subscriptions": "Obunalar",
+    "actions": "Amallar",
+    "id": "ID"
+  },
+
+   "websocket": {
+    "title": "MQTT WebSocket Mijoz",
+    "url": "URL",
+    "port": "Port",
+    "path": "Yo‘l",
+    "protocol": "Protokol",
+    "username": "Foydalanuvchi nomi",
+    "password": "Parol",
+    "clientId": "Mijoz ID",
+    "connect": "Ulanish",
+    "disconnect": "Ulanishni uzish",
+    "publish": "Yuborish",
+    "subscribe": "Obuna bo‘lish",
+    "add": "Qo‘shish",
+    "remove": "O‘chirish",
+    "topic": "Mavzu",
+    "message": "Xabar",
+    "qos": "QoS",
+    "clear": "Tozalash",
+    "publishConsole": "Yuborish Konsoli",
+    "subscribeConsole": "Obuna Konsoli",
+    "subscribed": "Obuna bo‘ldi",
+    "unsubscribed": "Obuna bekor qilindi"
+  }
+}

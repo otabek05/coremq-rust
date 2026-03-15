@@ -1,1 +1,26 @@
+# Rust
 /target
+*.redb
+
+# Data (runtime artifacts)
+/data
+
+# Client (Node)
+client/node_modules
+client/dist
+client/build
+client/out
+client/coverage
+client/tsconfig.tsbuildinfo
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# OS / Editor
+.DS_Store
+.vscode
