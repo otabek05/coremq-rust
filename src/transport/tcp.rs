@@ -26,6 +26,7 @@ pub async fn tcp_connection(
 
     let mut ticker = time::interval(Duration::from_secs(5));
     ticker.set_missed_tick_behavior(time::MissedTickBehavior::Delay);
+    let remote_addr = socket.peer_addr()?;
 
     loop {
         tokio::select! {
@@ -55,7 +56,7 @@ pub async fn tcp_connection(
                                         Decoder::Connect(p) => {
                                             client_id = Some(p.client_id.clone());
                                             timeout_duration = Duration::from_secs((p.keep_alive as u64) * 3 / 2);
-                                            if let Err(e) =  state.connect_tx.send(ConnectCommand::Connect(p.clone(), connected_port,  tx.clone() )) {
+                                            if let Err(e) =  state.connect_tx.send(ConnectCommand::Connect(p.clone(), connected_port, remote_addr, tx.clone() )) {
                                                 println!("Error connecting:  {}", e);
                                             }
                                             Encoder::ConnAck {session_present: false, }

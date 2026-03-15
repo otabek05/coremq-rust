@@ -5,7 +5,7 @@ use casbin::Enforcer;
 use serde::Serialize;
 use tokio::sync::mpsc;
 
-use crate::{engine::AdminCommand, services::jwt_service::JwtService, storage::redb::Storage};
+use crate::{engine::AdminCommand, services::jwt::JwtService, storage::redb::Storage};
 
 #[derive(Clone)]
 pub struct ApiState {

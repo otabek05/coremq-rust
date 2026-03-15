@@ -14,7 +14,7 @@ use std::{net::SocketAddr, sync::Arc};
 use tokio::{net::TcpListener, sync::mpsc};
 
 use crate::{
-    api::{api_state::ApiState, router::RouterHandler}, engine::{AdminCommand, ConnectCommand, Engine, EngineChannels, PubSubCommand}, services::{ClientService, jwt_service::{self, JwtService}}, storage::redb::Storage, transport::{ProtocolState, tcp::tcp_connection, ws::ws_handler}
+    api::{api_state::ApiState, router::RouterHandler}, engine::{AdminCommand, ConnectCommand, Engine, EngineChannels, PubSubCommand}, services::{SessionService, jwt::{self, JwtService}}, storage::redb::Storage, transport::{ProtocolState, tcp::tcp_connection, ws::ws_handler}
 };
 
 #[tokio::main]
@@ -38,7 +38,7 @@ async fn main() -> anyhow::Result<()> {
         Err(e) => { panic!("Failed to create database: {}", e)}
     };
 
-    let client_service = Arc::new(ClientService::new());
+    let client_service = Arc::new(SessionService::new());
     let jwt_service = Arc::new(JwtService::new(&config.middleware));
     let enforcer = Arc::new(enforcer);
     let db_arc = Arc::new(db);

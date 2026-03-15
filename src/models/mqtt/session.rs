@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, net::SocketAddr};
 use chrono::{DateTime, Local};
 use serde::Serialize;
 use tokio::sync::{ mpsc};
@@ -14,6 +14,7 @@ pub struct Session {
     pub client_id: String,
     pub username: String,
     pub clean_session: bool,
+    pub remote_addr: SocketAddr,
     pub connected_port: u16,
 
     #[serde(serialize_with = "format_datetime")]
@@ -30,6 +31,7 @@ impl Session {
         username: String,
         clean_session: bool,
         connected_port: u16,
+        remote_addr: SocketAddr,
         tx: mpsc::Sender<MqttChannel>,
     ) -> Self {
         Self {
@@ -39,6 +41,7 @@ impl Session {
             connected_port,
             connected_at: Local::now(),
             subscriptions: HashMap::new(),
+            remote_addr,
             tx,
         }
     }

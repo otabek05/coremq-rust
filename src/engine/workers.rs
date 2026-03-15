@@ -5,7 +5,13 @@ use tokio::{net::TcpListener, sync::watch, task::JoinHandle};
 use tower_http::cors::CorsLayer;
 
 use crate::{
-    engine::Engine, enums::protocol::ProtocolType, transport::{ProtocolState, tcp::tcp_connection, ws::{WsState, ws_handler}}
+    engine::Engine,
+    enums::protocol::ProtocolType,
+    transport::{
+        ProtocolState,
+        tcp::tcp_connection,
+        ws::{WsState, ws_handler},
+    },
 };
 
 impl Engine {
@@ -34,9 +40,9 @@ impl Engine {
     }
 
     async fn ws_worker(port: u16, state: Arc<ProtocolState>, mut stop_rx: watch::Receiver<bool>) {
-        let ws_state = WsState{
+        let ws_state = WsState {
             engine: state.clone(),
-            port: port
+            port: port,
         };
 
         let addr: SocketAddr = format!("0.0.0.0:{}", port).parse().unwrap();
@@ -45,7 +51,14 @@ impl Engine {
             .with_state(ws_state.clone())
             .layer(CorsLayer::permissive());
 
-        let server = axum::serve(tokio::net::TcpListener::bind(addr).await.unwrap(), app);
+        let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
+
+        let server = axum::serve(
+            listener,
+            app.into_make_service_with_connect_info::<SocketAddr>(),
+        );
+
+    //    let server = axum::serve(tokio::net::TcpListener::bind(addr).await.unwrap(), app);
         println!("MQTT WS listening on port {}", port);
 
         tokio::select! {
@@ -79,14 +92,15 @@ impl Engine {
                 ProtocolType::Ws => tokio::spawn(async move {
                     Engine::ws_worker(port_num, state_clone, rx).await;
                 }),
-                _ => continue, 
+                _ => continue,
             };
 
-            self.listeners.insert(port_num, (handle, tx, port_cfg.clone()));
+            self.listeners
+                .insert(port_num, (handle, tx, port_cfg.clone()));
         }
     }
 
-    pub async fn stop_listener(&mut self, port: u16)  {
+    pub async fn stop_listener(&mut self, port: u16) {
         if let Some((handle, stop_tx, _)) = self.listeners.remove(&port) {
             stop_tx.send(true).unwrap();
             handle.await.unwrap();

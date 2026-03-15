@@ -3,11 +3,13 @@ use tokio::{sync::watch, task::JoinHandle};
 
 
 use crate::{
-    engine::{AdminCommand, ConnectCommand, EngineChannels, PubSubCommand}, enums::MqttChannel, models::{config::Config, listener::ListenerConfig, pagination::Page, session::Session}, protocol::packets::PublishPacket, services::{ClientService, TopicService}
+    engine::{AdminCommand, ConnectCommand, EngineChannels, PubSubCommand}, 
+    enums::MqttChannel, models::{config::Config, listener::ListenerConfig, pagination::Page, session::Session}, 
+    protocol::packets::PublishPacket, services::{SessionService, TopicService}
 };
 
 pub struct Engine {
-    client_service: Arc<ClientService>,
+    client_service: Arc<SessionService>,
     topic_service: TopicService,
     channels: EngineChannels,
    pub listeners: HashMap<u16, (JoinHandle<()>, watch::Sender<bool>, ListenerConfig)>,
@@ -16,7 +18,7 @@ pub struct Engine {
 
 impl Engine {
     pub fn new(
-        client_service: Arc<ClientService>,
+        client_service: Arc<SessionService>,
         config: Config,
         channels: EngineChannels,
     ) -> Self {
@@ -58,7 +60,7 @@ impl Engine {
             tokio::select! {
                 Some(cmd) = self.channels.connect_rx.recv() => {
                     match cmd {
-                        ConnectCommand::Connect(packet, port,  tx) => {
+                        ConnectCommand::Connect(packet, port, remote_addr,   tx) => {
                             let old_session = self.client_service.remove_client(&packet.client_id);
                             if let Some(session) = old_session {
                                 self.topic_service.remove_client(&session.client_id);
@@ -67,7 +69,7 @@ impl Engine {
 
                             println!("Clinet connected: {:?}", packet);
 
-                            self.client_service.add_client(&packet, port, tx);
+                            self.client_service.add_client(&packet, port, remote_addr, tx);
                         }
                         ConnectCommand::Disconnect(client_id) => {
                             self.drop_client(&client_id);

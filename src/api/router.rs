@@ -1,8 +1,8 @@
-use axum::{Router, http::StatusCode, response::Html, routing::{delete, get, post}};
+use axum::{Router, http::StatusCode, middleware, response::Html, routing::{delete, get, post}};
 use tower_http::cors::{Any, CorsLayer};
 
 
-use crate::api::{ api_state::ApiState, controllers::{clients, listeners, users}};
+use crate::api::{ api_state::ApiState, controllers::{sessions, listeners, users}, auth};
 
 pub struct  RouterHandler {}
 
@@ -19,6 +19,7 @@ impl RouterHandler  {
         .route("/api/v1/listeners", get(listeners::get_listeners))
         .route("/api/v1/listeners/:port", delete(listeners::stop_listener))
         .fallback(not_found)
+        .layer(middleware::from_fn_with_state( state.clone(),  auth::casbin::auth_middleware))
         .layer(self.cors())
         .with_state(state)
         
@@ -31,7 +32,7 @@ impl RouterHandler  {
 
     pub fn get_session_routes(&self) -> Router<ApiState> {
         Router::new()
-        .route("/sessions", get(clients::get_clients))
+        .route("/sessions", get(sessions::get_sessions))
     }
 
     pub fn get_user_routes(&self) -> Router<ApiState> {

@@ -1,7 +1,7 @@
 
 pub mod router;
 pub mod controllers;
-pub mod middleware;
+pub mod auth;
 pub mod api_state;
 
 

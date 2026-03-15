@@ -1,9 +1,8 @@
-use std::{sync::Arc, time::Duration};
+use std::{net::SocketAddr, sync::Arc, time::Duration};
 
 use axum::{
     extract::{
-        State, WebSocketUpgrade,
-        ws::{Message, WebSocket},
+        ConnectInfo, State, WebSocketUpgrade, ws::{Message, WebSocket}
     },
     response::IntoResponse,
 };
@@ -34,13 +33,15 @@ pub struct WsState {
 
 pub async fn ws_handler(
     ws: WebSocketUpgrade,
-    State(state): State<WsState>
+    State(state): State<WsState>,
+    ConnectInfo(addr): ConnectInfo<SocketAddr>,
 ) -> impl IntoResponse {
+     println!("Client request arrived from {:?}", addr);
     ws.protocols(["mqtt"])
-        .on_upgrade(move |socket| handle_socket(socket, state))
+        .on_upgrade(move |socket| handle_socket(socket, state, addr))
 }
 
-async fn handle_socket(socket: WebSocket, state: WsState) {
+async fn handle_socket(socket: WebSocket, state: WsState,   remote_addr: SocketAddr,) {
     println!("Client connected via WebSocket");
 
     let (tx, mut rx) = mpsc::channel::<MqttChannel>(32);
@@ -54,6 +55,7 @@ async fn handle_socket(socket: WebSocket, state: WsState) {
 
     let mut ticker = time::interval(Duration::from_secs(5));
     ticker.set_missed_tick_behavior(time::MissedTickBehavior::Delay);
+
 
     loop {
         tokio::select! {
@@ -79,7 +81,7 @@ async fn handle_socket(socket: WebSocket, state: WsState) {
                                         Decoder::Connect(p) => {
                                             client_id = Some(p.client_id.clone());
                                             timeout_duration = Duration::from_secs((p.keep_alive as u64) * 3 / 2);
-                                            if let Err(e) =  state.engine.connect_tx.send(ConnectCommand::Connect(p.clone(), state.port,  tx.clone() )) {
+                                            if let Err(e) =  state.engine.connect_tx.send(ConnectCommand::Connect(p.clone(), state.port, remote_addr,  tx.clone() )) {
                                                 println!("Error connecting:  {}", e);
                                             }
                                             Encoder::ConnAck {session_present: false, }

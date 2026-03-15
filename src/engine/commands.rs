@@ -1,3 +1,5 @@
+use std::net::SocketAddr;
+
 use tokio::sync::{mpsc, oneshot};
 
 use crate::{
@@ -13,7 +15,7 @@ pub struct EngineChannels {
     pub admin_rx: mpsc::UnboundedReceiver<AdminCommand>,
 }
 pub enum ConnectCommand {
-    Connect(ConnectPacket, u16, mpsc::Sender<MqttChannel>),
+    Connect(ConnectPacket, u16, SocketAddr, mpsc::Sender<MqttChannel>),
     Disconnect(String),
 }
 
