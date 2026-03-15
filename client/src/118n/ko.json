@@ -1,0 +1,52 @@
+{
+  "welcome": "환영합니다",
+  "logout": "로그아웃",
+  "need_help": "도움이 필요하신가요?",
+  "nav": {
+    "home": "홈",
+    "sessions": "세션",
+    "listeners": "리스너",
+    "admin": "관리자",
+    "webhook": "웹훅",
+    "websocket": "Websocket"
+  },
+
+  "sessions": {
+    "title": "세션",
+    "search": "검색",
+    "refresh": "새로고침",
+    "clientId": "클라이언트 ID",
+    "username": "사용자 이름",
+    "remoteAddress": "원격 주소",
+    "port": "포트",
+    "connectedAt": "연결 시간",
+    "subscriptions": "구독",
+    "actions": "작업",
+    "id": "번호"
+  },
+
+   "websocket": {
+    "title": "MQTT 웹소켓 클라이언트",
+    "url": "URL",
+    "port": "포트",
+    "path": "경로",
+    "protocol": "프로토콜",
+    "username": "사용자 이름",
+    "password": "비밀번호",
+    "clientId": "클라이언트 ID",
+    "connect": "연결",
+    "disconnect": "연결 해제",
+    "publish": "퍼블리시",
+    "subscribe": "구독",
+    "add": "추가",
+    "remove": "제거",
+    "topic": "주제",
+    "message": "메시지",
+    "qos": "QoS",
+    "clear": "지우기",
+    "publishConsole": "퍼블리시 콘솔",
+    "subscribeConsole": "구독 콘솔",
+    "subscribed": "구독됨",
+    "unsubscribed": "구독 해제됨"
+  }
+}
