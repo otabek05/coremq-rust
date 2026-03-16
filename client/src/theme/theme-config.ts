@@ -25,7 +25,7 @@ export const themeConfig: ThemeConfig = {
   /** **************************************
    * Base
    *************************************** */
-  classesPrefix: 'minimal',
+  classesPrefix: 'coremq',
   /** **************************************
    * Typography
    *************************************** */

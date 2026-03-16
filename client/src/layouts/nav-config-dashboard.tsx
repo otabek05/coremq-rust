@@ -1,9 +1,7 @@
 import { Icon } from '@iconify/react';
 import { useTranslation } from 'react-i18next';
 
-
 const icon = (name: string) => <Icon icon={name} width={22} />;
-
 
 export type NavItem = {
   title: string;
@@ -12,50 +10,7 @@ export type NavItem = {
   info?: React.ReactNode;
 };
 
-export const navData = [
-  {
-    title: 'Home',
-    path: '/',
-    icon: icon('ic-analytics'),
-  },
-  {
-    title: 'Clients',
-    path: '/user',
-    icon: icon('ic-user'),
-  },
-  {
-    title: 'Listeners',
-    path: '/products',
-    icon: icon('ic-cart'),
-  },
-  {
-    title: 'Admin',
-    path: '/blog',
-    icon: icon('ic-blog'),
-  },
-  {
-    title: 'Webhook',
-    path: '/sign-in',
-    icon: icon('ic-lock'),
-  },
-  {
-    title: 'Not found',
-    path: '/404',
-    icon: icon('ic-disabled'),
-  },
-];
-
-
-
-const navIcons = {
-  home: 'ic-home',
-  sessions: 'ic-user',
-  listeners: 'ic-server',
-  admin: 'ic-settings',
-  webhook: 'ic-link',
-  websocket: 'ic-wifi',
-};
-
+export const navData: NavItem[] = [];
 
 export const useNavData = () => {
   const { t } = useTranslation();

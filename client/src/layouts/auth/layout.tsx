@@ -3,10 +3,6 @@ import type { CSSObject, Breakpoint } from '@mui/material/styles';
 import { merge } from 'es-toolkit';
 
 import Box from '@mui/material/Box';
-import Link from '@mui/material/Link';
-import Alert from '@mui/material/Alert';
-
-import { RouterLink } from 'src/routes/components';
 
 import { Logo } from 'src/components/logo';
 
@@ -23,6 +19,7 @@ import { useEffect, useState } from 'react';
 import { LinearProgress } from '@mui/material';
 import { useRouter } from 'src/routes/hooks';
 import Cookies from 'js-cookie';
+
 // ----------------------------------------------------------------------
 
 type LayoutBaseProps = Pick<LayoutSectionProps, 'sx' | 'children' | 'cssVars'>;
@@ -44,54 +41,38 @@ export function AuthLayout({
   layoutQuery = 'md',
 }: AuthLayoutProps) {
   const renderHeader = () => {
-   
     const router = useRouter();
-  const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(true);
 
-  // Check token on mount
-  useEffect(() => {
-    const token = Cookies.get('access_token');
+    useEffect(() => {
+      const token = Cookies.get('access_token');
+      if (token) {
+        router.push('/');
+      } else {
+        setLoading(false);
+      }
+    }, [router]);
 
-    if (token) {
-      router.push("/"); // redirect to main page
-    } else {
-      setLoading(false); // no token → show auth layout
+    if (loading) {
+      return (
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: '100vh',
+          }}
+        >
+          <LinearProgress sx={{ width: 1, maxWidth: 320 }} />
+        </Box>
+      );
     }
-  }, [router]);
-
-  // Show loading while checking token
-  if (loading) {
-    return (
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: '100vh',
-        }}
-      >
-        <LinearProgress sx={{ width: 1, maxWidth: 320 }} />
-      </Box>
-    );
-  }
 
     const headerSlotProps: HeaderSectionProps['slotProps'] = { container: { maxWidth: false } };
 
     const headerSlots: HeaderSectionProps['slots'] = {
-
-      leftArea: (
-        <>
-          <Logo />
-        </>
-      ),
-      rightArea: (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 1.5 } }}>
-          {/** @slot Help link */}
-          <Link href="#" component={RouterLink} color="inherit" sx={{ typography: 'subtitle2' }}>
-            Need help?
-          </Link>
-        </Box>
-      ),
+      leftArea: <Logo />,
+      rightArea: <Box />,
     };
 
     return (
@@ -134,22 +115,13 @@ export function AuthLayout({
     </MainSection>
   );
 
-  return  (
+  return (
     <LayoutSection
-      /** **************************************
-       * @Header
-       *************************************** */
       headerSection={renderHeader()}
-      /** **************************************
-       * @Footer
-       *************************************** */
       footerSection={renderFooter()}
-      /** **************************************
-       * @Styles
-       *************************************** */
       cssVars={{ '--layout-auth-content-width': '420px', ...cssVars }}
       sx={[
-        (theme) => ({
+        () => ({
           position: 'relative',
           '&::before': backgroundStyles(),
         }),

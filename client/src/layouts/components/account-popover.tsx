@@ -1,6 +1,7 @@
 import type { IconButtonProps } from '@mui/material/IconButton';
 
 import { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -28,8 +29,8 @@ export type AccountPopoverProps = IconButtonProps & {
 
 export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps) {
   const router = useRouter();
-
   const pathname = usePathname();
+  const { t } = useTranslation();
 
   const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
 
@@ -49,11 +50,10 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
     [handleClosePopover, router]
   );
 
-
-const handleLogout = () => {
-  Cookies.remove('access_token');
-  router.push('/sign-in'); 
-};
+  const handleLogout = () => {
+    Cookies.remove('access_token');
+    router.push('/sign-in');
+  };
 
   return (
     <>
@@ -69,8 +69,8 @@ const handleLogout = () => {
         }}
         {...other}
       >
-        <Avatar   sx={{ width: 1, height: 1 }}>
-          AppName
+        <Avatar sx={{ width: 1, height: 1, fontSize: 14, fontWeight: 700 }}>
+          MQ
         </Avatar>
       </IconButton>
 
@@ -88,11 +88,10 @@ const handleLogout = () => {
       >
         <Box sx={{ p: 2, pb: 1.5 }}>
           <Typography variant="subtitle2" noWrap>
-            coreMQ
+            CoreMQ
           </Typography>
-
           <Typography variant="body2" sx={{ color: 'text.secondary' }} noWrap>
-           coreMQ
+            MQTT Broker
           </Typography>
         </Box>
 
@@ -135,7 +134,7 @@ const handleLogout = () => {
 
         <Box sx={{ p: 1 }}>
           <Button onClick={handleLogout} fullWidth color="error" size="medium" variant="text">
-            Logout
+            {t('logout')}
           </Button>
         </Box>
       </Popover>
