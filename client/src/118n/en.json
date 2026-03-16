@@ -12,7 +12,7 @@
     "websocket": "Websocket"
   },
 
-   "sessions": {
+  "sessions": {
     "title": "Sessions",
     "search": "Search",
     "refresh": "Refresh",
@@ -23,11 +23,39 @@
     "connectedAt": "Connected At",
     "subscriptions": "Subscriptions",
     "actions": "Actions",
-    "id": "ID"
+    "id": "ID",
+    "empty": "No active sessions"
   },
 
+  "listeners": {
+    "title": "Listeners",
+    "name": "Name",
+    "protocol": "Protocol",
+    "host": "Host",
+    "port": "Port",
+    "tls": "TLS",
+    "empty": "No active listeners"
+  },
 
-   "websocket": {
+  "admin": {
+    "title": "Users",
+    "username": "Username",
+    "password": "Password",
+    "role": "Role",
+    "addUser": "New User",
+    "create": "Create",
+    "creating": "Creating...",
+    "cancel": "Cancel",
+    "empty": "No users found",
+    "validationRequired": "Username and password are required"
+  },
+
+  "webhook": {
+    "title": "Webhooks",
+    "comingSoon": "Webhook management is coming soon. Backend API is not yet implemented."
+  },
+
+  "websocket": {
     "title": "MQTT WebSocket Client",
     "url": "URL",
     "port": "Port",

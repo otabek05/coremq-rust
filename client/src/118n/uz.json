@@ -2,16 +2,17 @@
   "welcome": "Xush kelibsiz",
   "logout": "Chiqish",
   "need_help": "Yordam kerakmi?",
-   "nav": {
+
+  "nav": {
     "home": "Bosh sahifa",
-    "clients": "Mijozlar",
+    "sessions": "Sessiyalar",
     "listeners": "Tinglovchilar",
     "admin": "Admin",
     "webhook": "Webhook",
     "websocket": "Websocket"
   },
 
-   "sessions": {
+  "sessions": {
     "title": "Sessiyalar",
     "search": "Qidirish",
     "refresh": "Yangilash",
@@ -22,14 +23,43 @@
     "connectedAt": "Ulangan vaqt",
     "subscriptions": "Obunalar",
     "actions": "Amallar",
-    "id": "ID"
+    "id": "ID",
+    "empty": "Faol sessiyalar yo'q"
   },
 
-   "websocket": {
+  "listeners": {
+    "title": "Tinglovchilar",
+    "name": "Nomi",
+    "protocol": "Protokol",
+    "host": "Host",
+    "port": "Port",
+    "tls": "TLS",
+    "empty": "Faol tinglovchilar yo'q"
+  },
+
+  "admin": {
+    "title": "Foydalanuvchilar",
+    "username": "Foydalanuvchi nomi",
+    "password": "Parol",
+    "role": "Rol",
+    "addUser": "Yangi foydalanuvchi",
+    "create": "Yaratish",
+    "creating": "Yaratilmoqda...",
+    "cancel": "Bekor qilish",
+    "empty": "Foydalanuvchilar topilmadi",
+    "validationRequired": "Foydalanuvchi nomi va parol talab qilinadi"
+  },
+
+  "webhook": {
+    "title": "Webhooklar",
+    "comingSoon": "Webhook boshqaruvi tez orada qo'shiladi. Backend API hali tayyor emas."
+  },
+
+  "websocket": {
     "title": "MQTT WebSocket Mijoz",
     "url": "URL",
     "port": "Port",
-    "path": "Yo‘l",
+    "path": "Yo'l",
     "protocol": "Protokol",
     "username": "Foydalanuvchi nomi",
     "password": "Parol",
@@ -37,16 +67,16 @@
     "connect": "Ulanish",
     "disconnect": "Ulanishni uzish",
     "publish": "Yuborish",
-    "subscribe": "Obuna bo‘lish",
-    "add": "Qo‘shish",
-    "remove": "O‘chirish",
+    "subscribe": "Obuna bo'lish",
+    "add": "Qo'shish",
+    "remove": "O'chirish",
     "topic": "Mavzu",
     "message": "Xabar",
     "qos": "QoS",
     "clear": "Tozalash",
     "publishConsole": "Yuborish Konsoli",
     "subscribeConsole": "Obuna Konsoli",
-    "subscribed": "Obuna bo‘ldi",
+    "subscribed": "Obuna bo'ldi",
     "unsubscribed": "Obuna bekor qilindi"
   }
 }
