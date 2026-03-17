@@ -75,7 +75,7 @@ async fn main() -> anyhow::Result<()> {
     };
 
     let router = RouterHandler::new();
-    let addr = format!("{}:{}", "localhost", 18083);
+    let addr = format!("{}:{}", "0.0.0.0", 18083);
     let listener = TcpListener::bind(addr.clone()).await?;
     println!("Admin Panel running on {}", addr);
 
