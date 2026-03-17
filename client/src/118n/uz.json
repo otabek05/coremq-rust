@@ -1,0 +1,82 @@
+{
+  "welcome": "Xush kelibsiz",
+  "logout": "Chiqish",
+  "need_help": "Yordam kerakmi?",
+
+  "nav": {
+    "home": "Bosh sahifa",
+    "sessions": "Sessiyalar",
+    "listeners": "Tinglovchilar",
+    "admin": "Admin",
+    "webhook": "Webhook",
+    "websocket": "Websocket"
+  },
+
+  "sessions": {
+    "title": "Sessiyalar",
+    "search": "Qidirish",
+    "refresh": "Yangilash",
+    "clientId": "Client ID",
+    "username": "Foydalanuvchi",
+    "remoteAddress": "Manzil",
+    "port": "Port",
+    "connectedAt": "Ulangan vaqt",
+    "subscriptions": "Obunalar",
+    "actions": "Amallar",
+    "id": "ID",
+    "empty": "Faol sessiyalar yo'q"
+  },
+
+  "listeners": {
+    "title": "Tinglovchilar",
+    "name": "Nomi",
+    "protocol": "Protokol",
+    "host": "Host",
+    "port": "Port",
+    "tls": "TLS",
+    "empty": "Faol tinglovchilar yo'q"
+  },
+
+  "admin": {
+    "title": "Foydalanuvchilar",
+    "username": "Foydalanuvchi nomi",
+    "password": "Parol",
+    "role": "Rol",
+    "addUser": "Yangi foydalanuvchi",
+    "create": "Yaratish",
+    "creating": "Yaratilmoqda...",
+    "cancel": "Bekor qilish",
+    "empty": "Foydalanuvchilar topilmadi",
+    "validationRequired": "Foydalanuvchi nomi va parol talab qilinadi"
+  },
+
+  "webhook": {
+    "title": "Webhooklar",
+    "comingSoon": "Webhook boshqaruvi tez orada qo'shiladi. Backend API hali tayyor emas."
+  },
+
+  "websocket": {
+    "title": "MQTT WebSocket Mijoz",
+    "url": "URL",
+    "port": "Port",
+    "path": "Yo'l",
+    "protocol": "Protokol",
+    "username": "Foydalanuvchi nomi",
+    "password": "Parol",
+    "clientId": "Mijoz ID",
+    "connect": "Ulanish",
+    "disconnect": "Ulanishni uzish",
+    "publish": "Yuborish",
+    "subscribe": "Obuna bo'lish",
+    "add": "Qo'shish",
+    "remove": "O'chirish",
+    "topic": "Mavzu",
+    "message": "Xabar",
+    "qos": "QoS",
+    "clear": "Tozalash",
+    "publishConsole": "Yuborish Konsoli",
+    "subscribeConsole": "Obuna Konsoli",
+    "subscribed": "Obuna bo'ldi",
+    "unsubscribed": "Obuna bekor qilindi"
+  }
+}

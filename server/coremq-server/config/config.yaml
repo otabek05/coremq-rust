@@ -1,0 +1,47 @@
+app:
+  name: "kurt-mqtt-broker"
+  env: "production"
+    
+http:
+  enabled: true
+  host: "0.0.0.0"
+  port: 18085
+
+middleware:
+  model_path: server/coremq-server/config/model.conf
+  policy_path: server/coremq-server/config/policy.csv
+  secret: something-very-long-sercret
+
+mqtt:
+  listeners:
+
+    - name: "tcp-public"
+      protocol: "tcp"
+      host: "0.0.0.0"
+      port: 1883
+    
+    - name: "tcp-public-2"
+      protocol: "tcp"
+      host: "0.0.0.0"
+      port: 1884
+
+    - name: "tls-secure"
+      protocol: "tls"
+      host: "0.0.0.0"
+      port: 8883
+      tls:
+        key: "/etc/certs/server.key"
+        cert: "/etc/certs/ca.crt"
+
+    - name: "ws"
+      protocol: "ws"
+      host: "0.0.0.0"
+      port: 8083
+
+    - name: "wss"
+      protocol: "wss"
+      host: "0.0.0.0"
+      port: 8084
+      tls:
+        cert: "/etc/certs/server.crt"
+        key: "/etc/certs/server.key"
