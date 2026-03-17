@@ -4,9 +4,7 @@ import { merge } from 'es-toolkit';
 import { useBoolean } from 'minimal-shared/hooks';
 
 import Box from '@mui/material/Box';
-import Alert from '@mui/material/Alert';
 import { useTheme } from '@mui/material/styles';
-
 
 import { NavMobile, NavDesktop } from './nav';
 import { layoutClasses } from '../core/classes';
@@ -26,7 +24,6 @@ import type { LayoutSectionProps } from '../core/layout-section';
 
 // ----------------------------------------------------------------------
 
-
 export const _langs = [
   {
     value: 'en',
@@ -34,7 +31,7 @@ export const _langs = [
     icon: '/assets/icons/flags/us.png',
   },
   {
-    value: "uz",
+    value: 'uz',
     label: "O'zbekcha",
     icon: '/assets/icons/flags/uz.png',
   },
@@ -74,30 +71,15 @@ export function DashboardLayout({
     };
 
     const headerSlots: HeaderSectionProps['slots'] = {
-      topArea: (
-        <Alert severity="info" sx={{ display: 'none', borderRadius: 0 }}>
-          This is an info Alert.
-        </Alert>
-      ),
       leftArea: (
-        <>
-          {/** @slot Nav mobile */}
-          <MenuButton
-            onClick={onOpen}
-            sx={{ mr: 1, ml: -1, [theme.breakpoints.up(layoutQuery)]: { display: 'none' } }}
-          />
-          <NavMobile data={navData} open={open} onClose={onClose} />
-        </>
+        <MenuButton
+          onClick={onOpen}
+          sx={{ mr: 1, ml: -1, [theme.breakpoints.up(layoutQuery)]: { display: 'none' } }}
+        />
       ),
       rightArea: (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0, sm: 0.75 } }}>
-          {/** @slot Language popover
-           *   <LanguagePopover data={_langs} />  
-           *   <NotificationsPopover data={_notifications} /> 
-           */}
-
-          {/** @slot Account drawer */}
-           <LanguagePopover data={_langs} />  
+          <LanguagePopover data={_langs} />
           <AccountPopover data={_account} />
         </Box>
       ),
@@ -115,29 +97,13 @@ export function DashboardLayout({
     );
   };
 
-  const renderFooter = () => null;
-
   const renderMain = () => <MainSection {...slotProps?.main}>{children}</MainSection>;
 
   return (
     <LayoutSection
-      /** **************************************
-       * @Header
-       *************************************** */
       headerSection={renderHeader()}
-      /** **************************************
-       * @Sidebar
-       *************************************** */
-      sidebarSection={
-        <NavDesktop data={useNavData()} layoutQuery={layoutQuery}  />
-      }
-      /** **************************************
-       * @Footer
-       *************************************** */
-      footerSection={renderFooter()}
-      /** **************************************
-       * @Styles
-       *************************************** */
+      sidebarSection={<NavDesktop data={useNavData()} layoutQuery={layoutQuery} />}
+      footerSection={null}
       cssVars={{ ...dashboardLayoutVars(theme), ...cssVars }}
       sx={[
         {

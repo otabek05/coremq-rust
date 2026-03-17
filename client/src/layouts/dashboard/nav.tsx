@@ -15,7 +15,6 @@ import { RouterLink } from 'src/routes/components';
 import { Logo } from 'src/components/logo';
 import { Scrollbar } from 'src/components/scrollbar';
 
-
 import type { NavItem } from '../nav-config-dashboard';
 
 // ----------------------------------------------------------------------
@@ -48,9 +47,10 @@ export function NavDesktop({
         display: 'none',
         position: 'fixed',
         flexDirection: 'column',
+        bgcolor: 'background.default',
         zIndex: 'var(--layout-nav-zIndex)',
         width: 'var(--layout-nav-vertical-width)',
-        borderRight: `1px solid ${varAlpha(theme.vars.palette.grey['500Channel'], 0.12)}`,
+        borderRight: `1px solid ${varAlpha(theme.vars.palette.grey['500Channel'], 0.08)}`,
         [theme.breakpoints.up(layoutQuery)]: {
           display: 'flex',
         },
@@ -77,7 +77,6 @@ export function NavMobile({
     if (open) {
       onClose();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
   return (
@@ -94,22 +93,21 @@ export function NavMobile({
         },
       }}
     >
-      <NavContent data={data} slots={slots}  />
+      <NavContent data={data} slots={slots} />
     </Drawer>
   );
 }
 
 // ----------------------------------------------------------------------
 
-export function NavContent({ data, slots,  sx }: NavContentProps) {
+export function NavContent({ data, slots, sx }: NavContentProps) {
   const pathname = usePathname();
 
   return (
     <>
-      <Logo />
+      <Logo isSingle={false} />
 
       {slots?.topArea}
-
 
       <Scrollbar fillContent>
         <Box
@@ -127,13 +125,13 @@ export function NavContent({ data, slots,  sx }: NavContentProps) {
             component="ul"
             sx={{
               gap: 0.5,
-              mt: 4, 
+              mt: 3,
               display: 'flex',
               flexDirection: 'column',
             }}
           >
             {data.map((item) => {
-              const isActived = item.path === pathname;
+              const isActive = item.path === pathname;
 
               return (
                 <ListItem disableGutters disablePadding key={item.title}>
@@ -152,7 +150,7 @@ export function NavContent({ data, slots,  sx }: NavContentProps) {
                         fontWeight: 'fontWeightMedium',
                         color: theme.vars.palette.text.secondary,
                         minHeight: 44,
-                        ...(isActived && {
+                        ...(isActive && {
                           fontWeight: 'fontWeightSemiBold',
                           color: theme.vars.palette.primary.main,
                           bgcolor: varAlpha(theme.vars.palette.primary.mainChannel, 0.08),
@@ -179,7 +177,6 @@ export function NavContent({ data, slots,  sx }: NavContentProps) {
           </Box>
         </Box>
       </Scrollbar>
-
     </>
   );
 }
