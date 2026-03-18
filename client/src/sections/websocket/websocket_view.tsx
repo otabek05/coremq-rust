@@ -152,13 +152,13 @@ export function WebsocketView() {
           Connection
         </Typography>
         <Grid container spacing={1.5}>
-          <Grid size={{ xs: 6, sm: 3 }}>
+          <Grid size={{ xs: 12, sm: 3 }}>
             <TextField size="small" fullWidth label={t('websocket.url')} value={url} onChange={(e) => setUrl(e.target.value)} disabled={inputDisabled} />
           </Grid>
-          <Grid size={{ xs: 3, sm: 1.5 }}>
+          <Grid size={{ xs: 4, sm: 1.5 }}>
             <TextField size="small" fullWidth label={t('websocket.port')} value={port} onChange={(e) => setPort(e.target.value)} disabled={inputDisabled} />
           </Grid>
-          <Grid size={{ xs: 3, sm: 1.5 }}>
+          <Grid size={{ xs: 4, sm: 1.5 }}>
             <TextField size="small" fullWidth label={t('websocket.path')} value={path} onChange={(e) => setPath(e.target.value)} disabled={inputDisabled} />
           </Grid>
           <Grid size={{ xs: 4, sm: 1.5 }}>
@@ -167,17 +167,17 @@ export function WebsocketView() {
               <MenuItem value="wss">wss</MenuItem>
             </TextField>
           </Grid>
-          <Grid size={{ xs: 4, sm: 2 }}>
+          <Grid size={{ xs: 6, sm: 2 }}>
             <TextField size="small" fullWidth label={t('websocket.username')} value={username} onChange={(e) => setUsername(e.target.value)} disabled={inputDisabled} />
           </Grid>
-          <Grid size={{ xs: 4, sm: 2.5 }}>
+          <Grid size={{ xs: 6, sm: 2.5 }}>
             <TextField size="small" fullWidth label={t('websocket.password')} type="password" value={password} onChange={(e) => setPassword(e.target.value)} disabled={inputDisabled} />
           </Grid>
-          <Grid size={{ xs: 8, sm: 4 }}>
+          <Grid size={{ xs: 12, sm: 4 }}>
             <TextField size="small" fullWidth label={t('websocket.clientId')} value={clientId} onChange={(e) => setClientId(e.target.value)} disabled={inputDisabled} />
           </Grid>
-          <Grid size={{ xs: 4, sm: 2 }}>
-            <Stack direction="row" spacing={1} sx={{ height: '100%', alignItems: 'center' }}>
+          <Grid size={{ xs: 12, sm: 2 }}>
+            <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
               <Button
                 variant="contained"
                 color="primary"

@@ -49,8 +49,8 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
       <IconButton
         onClick={handleOpenPopover}
         sx={{
-          width: 36,
-          height: 36,
+          width: { xs: 32, sm: 36 },
+          height: { xs: 32, sm: 36 },
           borderRadius: 1,
           bgcolor: 'rgba(148,163,184,0.08)',
           color: '#94A3B8',

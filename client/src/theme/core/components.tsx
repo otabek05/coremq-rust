@@ -21,11 +21,15 @@ const MuiButton: Components<Theme>['MuiButton'] = {
     disableElevation: true,
   },
   styleOverrides: {
-    root: {
+    root: ({ theme }) => ({
       borderRadius: 6,
-      textTransform: 'none',
+      textTransform: 'none' as const,
       fontWeight: 600,
-    },
+      fontSize: theme.typography.pxToRem(13),
+      [theme.breakpoints.up('sm')]: {
+        fontSize: theme.typography.pxToRem(14),
+      },
+    }),
     containedInherit: ({ theme }) => ({
       color: theme.vars.palette.common.white,
       backgroundColor: varAlpha(theme.vars.palette.grey['300Channel'], 0.12),
@@ -129,15 +133,27 @@ const MuiTableCell: Components<Theme>['MuiTableCell'] = {
       borderBottomColor: varAlpha(theme.vars.palette.grey['400Channel'], 0.08),
     }),
     head: ({ theme }) => ({
-      fontSize: theme.typography.pxToRem(13),
+      fontSize: theme.typography.pxToRem(11),
       color: theme.vars.palette.text.secondary,
       fontWeight: theme.typography.fontWeightSemiBold,
       backgroundColor: varAlpha(theme.vars.palette.grey['800Channel'], 0.6),
       textTransform: 'uppercase',
       letterSpacing: '0.04em',
+      padding: theme.spacing(1, 1.5),
+      whiteSpace: 'nowrap',
+      [theme.breakpoints.up('sm')]: {
+        fontSize: theme.typography.pxToRem(12),
+        padding: theme.spacing(1.25, 2),
+      },
     }),
     body: ({ theme }) => ({
       color: theme.vars.palette.text.primary,
+      fontSize: theme.typography.pxToRem(13),
+      padding: theme.spacing(1, 1.5),
+      [theme.breakpoints.up('sm')]: {
+        fontSize: theme.typography.pxToRem(14),
+        padding: theme.spacing(1.25, 2),
+      },
     }),
   },
 };

@@ -16,6 +16,23 @@ import { SignInRequest, Token } from 'src/types/login';
 import { signIn } from 'src/services/sigin_in';
 import { ApiResponse } from 'src/types/api_response';
 
+const inputSx = {
+  '& .MuiOutlinedInput-root': {
+    bgcolor: '#1A2035',
+    '& input': {
+      color: '#E2E8F0',
+      '&:-webkit-autofill': {
+        WebkitBoxShadow: '0 0 0 100px #1A2035 inset',
+        WebkitTextFillColor: '#E2E8F0',
+        caretColor: '#E2E8F0',
+      },
+    },
+  },
+  '& .MuiInputLabel-root': {
+    color: '#64748B',
+  },
+};
+
 export function SignInView() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
@@ -53,14 +70,31 @@ export function SignInView() {
     <>
       <Box
         sx={{
-          gap: 1,
+          gap: 0.5,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          mb: 5,
+          mb: 4,
         }}
       >
-        <Typography variant="h4" sx={{ fontWeight: 800, letterSpacing: '-0.02em' }}>
+        <Box
+          sx={{
+            width: 40,
+            height: 40,
+            borderRadius: 1.5,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: 'linear-gradient(135deg, #00A76F, #007867)',
+            color: '#fff',
+            fontWeight: 800,
+            fontSize: '0.8rem',
+            mb: 2,
+          }}
+        >
+          MQ
+        </Box>
+        <Typography variant="h5" sx={{ fontWeight: 700, letterSpacing: '-0.01em' }}>
           Sign in
         </Typography>
         <Typography variant="body2" sx={{ color: 'text.secondary' }}>
@@ -68,19 +102,14 @@ export function SignInView() {
         </Typography>
       </Box>
 
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-        }}
-      >
+      <Box sx={{ display: 'flex', flexDirection: 'column' }}>
         <TextField
           fullWidth
           name="username"
           label="Username"
           value={form.username}
           onChange={handleChange}
-          sx={{ mb: 2.5 }}
+          sx={{ ...inputSx, mb: 2 }}
           slotProps={{ inputLabel: { shrink: true } }}
         />
 
@@ -102,15 +131,15 @@ export function SignInView() {
                   <IconButton
                     onClick={() => setShowPassword(!showPassword)}
                     edge="end"
-                    sx={{ color: 'text.secondary' }}
+                    sx={{ color: '#64748B' }}
                   >
-                    <Iconify icon={showPassword ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
+                    <Iconify icon={showPassword ? 'lucide:eye' : 'lucide:eye-off'} width={18} />
                   </IconButton>
                 </InputAdornment>
               ),
             },
           }}
-          sx={{ mb: 3 }}
+          sx={{ ...inputSx, mb: 3 }}
         />
 
         {error && (
@@ -127,10 +156,7 @@ export function SignInView() {
           variant="contained"
           onClick={handleSignIn}
           disabled={loading}
-          sx={{
-            py: 1.5,
-            fontSize: '0.95rem',
-          }}
+          sx={{ py: 1.4 }}
         >
           {loading ? 'Signing in...' : 'Sign in'}
         </Button>

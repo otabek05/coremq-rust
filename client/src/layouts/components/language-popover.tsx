@@ -53,8 +53,8 @@ export function LanguagePopover({ data = [], sx, ...other }: LanguagePopoverProp
         aria-label="Languages button"
         onClick={onOpen}
         sx={{
-          width: 36,
-          height: 36,
+          width: { xs: 32, sm: 36 },
+          height: { xs: 32, sm: 36 },
           borderRadius: 1,
           bgcolor: open ? 'rgba(148,163,184,0.14)' : 'rgba(148,163,184,0.08)',
           border: '1px solid rgba(148,163,184,0.1)',
