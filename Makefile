@@ -10,7 +10,7 @@ dev:
 
 # Run Rust backend only
 server:
-	source $$HOME/.cargo/env 2>/dev/null; cargo run -p coremq-server
+	export PATH="$$HOME/.cargo/bin:$$PATH"; cargo run -p coremq-server
 
 # Run frontend dev server only
 client:
