@@ -1,11 +1,10 @@
-use axum::{extract::{Query, State}, response::Json};
+use axum::{extract::{Path, Query, State}, response::Json};
 
 use crate::{
-
   api::api_state::{ApiResponse, ApiState}, engine::AdminCommand, models::{pagination::Page, session::Session, session_query::SessionQuery}
 };
 
-use tokio::sync::{oneshot};
+use tokio::sync::oneshot;
 use axum::http::StatusCode;
 
 pub async fn get_sessions(
@@ -28,5 +27,27 @@ pub async fn get_sessions(
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
     Ok(Json(ApiResponse::success(sessions, "successfully fetched data")))
+}
+
+pub async fn disconnect_session(
+    State(state): State<ApiState>,
+    Path(client_id): Path<String>,
+) -> Result<Json<ApiResponse<String>>, StatusCode> {
+    let (reply_tx, reply_rx) = oneshot::channel();
+
+    state
+        .engine
+        .send(AdminCommand::DisconnectClient(client_id.clone(), reply_tx))
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+
+    let found = reply_rx
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+
+    if found {
+        Ok(Json(ApiResponse::success(client_id, "client disconnected")))
+    } else {
+        Err(StatusCode::NOT_FOUND)
+    }
 }
 

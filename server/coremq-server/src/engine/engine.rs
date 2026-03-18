@@ -113,6 +113,14 @@ impl Engine {
                             let listeners = self.get_listeners();
                             let _ = reply_tx.send(listeners);
                         }
+
+                        AdminCommand::DisconnectClient(client_id, reply_tx) => {
+                            let existed = self.client_service.get_session(&client_id).is_some();
+                            if existed {
+                                self.drop_client(&client_id);
+                            }
+                            let _ = reply_tx.send(existed);
+                        }
                     }
                 }
             }

@@ -27,6 +27,7 @@ pub enum PubSubCommand {
 
 pub enum AdminCommand {
     GetClients(oneshot::Sender<Page<Session>>, usize, usize),
-    GetListeners(oneshot::Sender<Vec<ListenerConfig>>), 
-    StopListener(u16)
+    GetListeners(oneshot::Sender<Vec<ListenerConfig>>),
+    StopListener(u16),
+    DisconnectClient(String, oneshot::Sender<bool>),
 }
