@@ -1,6 +1,5 @@
 import type { Theme } from '@mui/material/styles';
 
-// ----------------------------------------------------------------------
 
 export function dashboardLayoutVars(theme: Theme) {
   return {

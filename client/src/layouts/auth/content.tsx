@@ -6,7 +6,6 @@ import Box from '@mui/material/Box';
 
 import { layoutClasses } from '../core/classes';
 
-// ----------------------------------------------------------------------
 
 export type AuthContentProps = BoxProps;
 
@@ -20,7 +19,7 @@ export function AuthContent({ sx, children, className, ...other }: AuthContentPr
           px: 3,
           width: 1,
           zIndex: 2,
-          borderRadius: 3,
+          borderRadius: 2,
           display: 'flex',
           flexDirection: 'column',
           maxWidth: 'var(--layout-auth-content-width)',

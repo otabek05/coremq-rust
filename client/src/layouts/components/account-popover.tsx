@@ -5,18 +5,15 @@ import { useTranslation } from 'react-i18next';
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import Avatar from '@mui/material/Avatar';
 import Popover from '@mui/material/Popover';
 import Divider from '@mui/material/Divider';
-import MenuList from '@mui/material/MenuList';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
-import MenuItem, { menuItemClasses } from '@mui/material/MenuItem';
 import Cookies from 'js-cookie';
+import { Icon } from '@iconify/react';
 
-import { useRouter, usePathname } from 'src/routes/hooks';
+import { useRouter } from 'src/routes/hooks';
 
-// ----------------------------------------------------------------------
 
 export type AccountPopoverProps = IconButtonProps & {
   data?: {
@@ -29,7 +26,6 @@ export type AccountPopoverProps = IconButtonProps & {
 
 export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps) {
   const router = useRouter();
-  const pathname = usePathname();
   const { t } = useTranslation();
 
   const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
@@ -42,16 +38,9 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
     setOpenPopover(null);
   }, []);
 
-  const handleClickItem = useCallback(
-    (path: string) => {
-      handleClosePopover();
-      router.push(path);
-    },
-    [handleClosePopover, router]
-  );
-
   const handleLogout = () => {
     Cookies.remove('access_token');
+    handleClosePopover();
     router.push('/sign-in');
   };
 
@@ -60,19 +49,18 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
       <IconButton
         onClick={handleOpenPopover}
         sx={{
-          p: '2px',
-          width: 40,
-          height: 40,
-          background: (theme) =>
-            `linear-gradient(135deg, ${theme.vars.palette.primary.main}, ${theme.vars.palette.primary.dark})`,
-          borderRadius: 1.5,
+          width: 36,
+          height: 36,
+          borderRadius: 1,
+          bgcolor: 'rgba(148,163,184,0.08)',
+          color: '#94A3B8',
+          border: '1px solid rgba(148,163,184,0.1)',
+          '&:hover': { bgcolor: 'rgba(148,163,184,0.14)', color: '#E2E8F0' },
           ...sx,
         }}
         {...other}
       >
-        <Avatar sx={{ width: 1, height: 1, fontSize: 13, fontWeight: 700, bgcolor: 'transparent', color: 'common.white', borderRadius: 1.25 }}>
-          MQ
-        </Avatar>
+        <Icon icon="lucide:user" width={18} />
       </IconButton>
 
       <Popover
@@ -83,58 +71,38 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
         slotProps={{
           paper: {
-            sx: { width: 200 },
+            sx: { width: 200, mt: 1 },
           },
         }}
       >
-        <Box sx={{ p: 2, pb: 1.5 }}>
-          <Typography variant="subtitle2" noWrap>
-            CoreMQ
+        <Box sx={{ px: 2, py: 1.5 }}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+            Admin
           </Typography>
-          <Typography variant="body2" sx={{ color: 'text.secondary' }} noWrap>
-            MQTT Broker
+          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+            admin@coremq
           </Typography>
         </Box>
 
-        <Divider sx={{ borderStyle: 'dashed' }} />
-
-        <MenuList
-          disablePadding
-          sx={{
-            p: 1,
-            gap: 0.5,
-            display: 'flex',
-            flexDirection: 'column',
-            [`& .${menuItemClasses.root}`]: {
-              px: 1,
-              gap: 2,
-              borderRadius: 0.75,
-              color: 'text.secondary',
-              '&:hover': { color: 'text.primary' },
-              [`&.${menuItemClasses.selected}`]: {
-                color: 'text.primary',
-                bgcolor: 'action.selected',
-                fontWeight: 'fontWeightSemiBold',
-              },
-            },
-          }}
-        >
-          {data.map((option) => (
-            <MenuItem
-              key={option.label}
-              selected={option.href === pathname}
-              onClick={() => handleClickItem(option.href)}
-            >
-              {option.icon}
-              {option.label}
-            </MenuItem>
-          ))}
-        </MenuList>
-
-        <Divider sx={{ borderStyle: 'dashed' }} />
+        <Divider sx={{ borderColor: 'rgba(148,163,184,0.1)' }} />
 
         <Box sx={{ p: 1 }}>
-          <Button onClick={handleLogout} fullWidth color="error" size="medium" variant="text">
+          <Button
+            onClick={handleLogout}
+            fullWidth
+            size="small"
+            sx={{
+              justifyContent: 'flex-start',
+              px: 1.5,
+              py: 0.75,
+              borderRadius: 1,
+              color: '#FF5630',
+              fontSize: '0.835rem',
+              fontWeight: 500,
+              '&:hover': { bgcolor: 'rgba(255,86,48,0.08)' },
+            }}
+            startIcon={<Icon icon="lucide:log-out" width={16} />}
+          >
             {t('logout')}
           </Button>
         </Box>

@@ -1,5 +1,6 @@
 import type { Breakpoint } from '@mui/material/styles';
 
+import { useState } from 'react';
 import { merge } from 'es-toolkit';
 import { useBoolean } from 'minimal-shared/hooks';
 
@@ -10,7 +11,7 @@ import { NavMobile, NavDesktop } from './nav';
 import { layoutClasses } from '../core/classes';
 import { _account } from '../nav-config-account';
 import { dashboardLayoutVars } from './css-vars';
-import { navData, useNavData } from '../nav-config-dashboard';
+import { useNavData } from '../nav-config-dashboard';
 import { MainSection } from '../core/main-section';
 import { MenuButton } from '../components/menu-button';
 import { HeaderSection } from '../core/header-section';
@@ -22,7 +23,6 @@ import type { MainSectionProps } from '../core/main-section';
 import type { HeaderSectionProps } from '../core/header-section';
 import type { LayoutSectionProps } from '../core/layout-section';
 
-// ----------------------------------------------------------------------
 
 export const _langs = [
   {
@@ -60,8 +60,16 @@ export function DashboardLayout({
   layoutQuery = 'lg',
 }: DashboardLayoutProps) {
   const theme = useTheme();
+  const navData = useNavData();
 
-  const { value: open, onFalse: onClose, onTrue: onOpen } = useBoolean();
+  // Mobile drawer
+  const { value: mobileOpen, onFalse: onMobileClose, onTrue: onMobileOpen } = useBoolean();
+
+  // Desktop collapse
+  const [collapsed, setCollapsed] = useState(false);
+  const toggleCollapsed = () => setCollapsed((prev) => !prev);
+
+  const navWidth = collapsed ? '72px' : '260px';
 
   const renderHeader = () => {
     const headerSlotProps: HeaderSectionProps['slotProps'] = {
@@ -73,7 +81,7 @@ export function DashboardLayout({
     const headerSlots: HeaderSectionProps['slots'] = {
       leftArea: (
         <MenuButton
-          onClick={onOpen}
+          onClick={onMobileOpen}
           sx={{ mr: 1, ml: -1, [theme.breakpoints.up(layoutQuery)]: { display: 'none' } }}
         />
       ),
@@ -102,18 +110,33 @@ export function DashboardLayout({
   return (
     <LayoutSection
       headerSection={renderHeader()}
-      sidebarSection={<NavDesktop data={useNavData()} layoutQuery={layoutQuery} />}
+      sidebarSection={
+        <>
+          <NavDesktop
+            data={navData}
+            layoutQuery={layoutQuery}
+            collapsed={collapsed}
+            onToggle={toggleCollapsed}
+          />
+          <NavMobile
+            data={navData}
+            open={mobileOpen}
+            onClose={onMobileClose}
+          />
+        </>
+      }
       footerSection={null}
-      cssVars={{ ...dashboardLayoutVars(theme), ...cssVars }}
+      cssVars={{
+        ...dashboardLayoutVars(theme),
+        '--layout-nav-vertical-width': navWidth,
+        ...cssVars,
+      }}
       sx={[
         {
           [`& .${layoutClasses.sidebarContainer}`]: {
             [theme.breakpoints.up(layoutQuery)]: {
-              pl: 'var(--layout-nav-vertical-width)',
-              transition: theme.transitions.create(['padding-left'], {
-                easing: 'var(--layout-transition-easing)',
-                duration: 'var(--layout-transition-duration)',
-              }),
+              pl: navWidth,
+              transition: 'padding-left 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
             },
           },
         },

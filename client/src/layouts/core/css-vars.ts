@@ -1,6 +1,5 @@
 import type { Theme } from '@mui/material/styles';
 
-// ----------------------------------------------------------------------
 
 export function layoutSectionVars(theme: Theme) {
   return {

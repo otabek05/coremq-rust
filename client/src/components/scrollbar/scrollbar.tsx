@@ -7,7 +7,6 @@ import { scrollbarClasses } from './classes';
 
 import type { ScrollbarProps } from './types';
 
-// ----------------------------------------------------------------------
 
 export function Scrollbar({
   sx,
@@ -39,7 +38,6 @@ export function Scrollbar({
   );
 }
 
-// ----------------------------------------------------------------------
 
 const ScrollbarRoot = styled(SimpleBar, {
   shouldForwardProp: (prop: string) => !['fillContent', 'sx'].includes(prop),

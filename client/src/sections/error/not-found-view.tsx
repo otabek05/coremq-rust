@@ -7,7 +7,6 @@ import { RouterLink } from 'src/routes/components';
 
 import { Logo } from 'src/components/logo';
 
-// ----------------------------------------------------------------------
 
 export function NotFoundView() {
   return (

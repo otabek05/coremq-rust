@@ -6,7 +6,6 @@ import { themeConfig } from '../theme-config';
 
 import type { ThemeColorScheme } from '../types';
 
-// ----------------------------------------------------------------------
 
 /**
  * TypeScript (type definition and extension)
@@ -61,7 +60,6 @@ export type GreyExtend = {
   '900Channel': string;
 };
 
-// ----------------------------------------------------------------------
 
 // Primary color
 export const primary = createPaletteChannel(themeConfig.palette.primary);
@@ -121,7 +119,6 @@ export const action = {
   light: { ...baseAction, active: grey[400] },
 };
 
-// ----------------------------------------------------------------------
 
 // Base palette
 export const basePalette = {

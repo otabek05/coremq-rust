@@ -6,7 +6,6 @@ import { grey } from './palette';
 
 import type { ThemeColorScheme } from '../types';
 
-// ----------------------------------------------------------------------
 
 function createShadows(colorChannel: string): Shadows {
   const color1 = varAlpha(colorChannel, 0.2);

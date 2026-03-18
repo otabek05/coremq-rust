@@ -4,7 +4,6 @@ import { varAlpha } from 'minimal-shared/utils';
 
 import SvgIcon from '@mui/material/SvgIcon';
 
-// ----------------------------------------------------------------------
 
 const MuiBackdrop: Components<Theme>['MuiBackdrop'] = {
   styleOverrides: {
@@ -23,7 +22,7 @@ const MuiButton: Components<Theme>['MuiButton'] = {
   },
   styleOverrides: {
     root: {
-      borderRadius: 10,
+      borderRadius: 6,
       textTransform: 'none',
       fontWeight: 600,
     },
@@ -58,7 +57,7 @@ const MuiCard: Components<Theme>['MuiCard'] = {
       zIndex: 0,
       position: 'relative',
       boxShadow: 'none',
-      borderRadius: 16,
+      borderRadius: 10,
       backgroundColor: varAlpha(theme.vars.palette.grey['800Channel'], 0.4),
       border: `1px solid ${varAlpha(theme.vars.palette.grey['400Channel'], 0.08)}`,
       backdropFilter: 'blur(8px)',
@@ -190,7 +189,7 @@ const MuiChip: Components<Theme>['MuiChip'] = {
 const MuiAlert: Components<Theme>['MuiAlert'] = {
   styleOverrides: {
     root: {
-      borderRadius: 12,
+      borderRadius: 8,
     },
     standardInfo: ({ theme }) => ({
       backgroundColor: varAlpha(theme.vars.palette.info.mainChannel, 0.12),
@@ -214,7 +213,7 @@ const MuiAlert: Components<Theme>['MuiAlert'] = {
 const MuiDialog: Components<Theme>['MuiDialog'] = {
   styleOverrides: {
     paper: ({ theme }) => ({
-      borderRadius: 16,
+      borderRadius: 10,
       backgroundColor: '#1A2035',
       border: `1px solid ${varAlpha(theme.vars.palette.grey['400Channel'], 0.1)}`,
       boxShadow: '0 24px 48px rgba(0,0,0,0.4)',
@@ -225,7 +224,7 @@ const MuiDialog: Components<Theme>['MuiDialog'] = {
 const MuiPopover: Components<Theme>['MuiPopover'] = {
   styleOverrides: {
     paper: ({ theme }) => ({
-      borderRadius: 12,
+      borderRadius: 8,
       backgroundColor: '#1A2035',
       border: `1px solid ${varAlpha(theme.vars.palette.grey['400Channel'], 0.1)}`,
       boxShadow: '0 12px 32px rgba(0,0,0,0.4)',
@@ -317,7 +316,6 @@ const MuiRadio: Components<Theme>['MuiRadio'] = {
   },
 };
 
-// ----------------------------------------------------------------------
 
 export const components = {
   MuiCard,

@@ -20,7 +20,6 @@ import { LinearProgress } from '@mui/material';
 import { useRouter } from 'src/routes/hooks';
 import Cookies from 'js-cookie';
 
-// ----------------------------------------------------------------------
 
 type LayoutBaseProps = Pick<LayoutSectionProps, 'sx' | 'children' | 'cssVars'>;
 

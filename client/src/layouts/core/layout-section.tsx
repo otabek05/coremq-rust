@@ -8,7 +8,6 @@ import GlobalStyles from '@mui/material/GlobalStyles';
 import { layoutClasses } from './classes';
 import { layoutSectionVars } from './css-vars';
 
-// ----------------------------------------------------------------------
 
 export type LayoutSectionProps = React.ComponentProps<'div'> & {
   sx?: SxProps<Theme>;
@@ -64,7 +63,6 @@ export function LayoutSection({
   );
 }
 
-// ----------------------------------------------------------------------
 
 const LayoutRoot = styled('div')``;
 

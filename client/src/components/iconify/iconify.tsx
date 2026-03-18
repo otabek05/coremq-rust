@@ -5,7 +5,6 @@ import { Icon } from '@iconify/react';
 
 import { styled } from '@mui/material/styles';
 
-// ----------------------------------------------------------------------
 
 export type IconifyProps = React.ComponentProps<typeof IconRoot> &
   Omit<IconProps, 'icon'> & {
@@ -35,6 +34,5 @@ export function Iconify({ className, icon, width = 20, height, sx, ...other }: I
   );
 }
 
-// ----------------------------------------------------------------------
 
 const IconRoot = styled(Icon)``;

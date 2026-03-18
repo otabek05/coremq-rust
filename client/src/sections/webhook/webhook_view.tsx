@@ -10,9 +10,9 @@ export function WebhookView() {
   const { t } = useTranslation();
 
   return (
-    <Box sx={{ p: 3 }}>
+    <Box sx={{ p: { xs: 2, sm: 3 } }}>
       <Box sx={{ mb: 3 }}>
-        <Typography variant="h4" sx={{ fontWeight: 700, letterSpacing: '-0.01em' }}>
+        <Typography variant="h4" sx={{ fontWeight: 700, letterSpacing: '-0.01em', fontSize: { xs: '1.4rem', sm: '2.125rem' } }}>
           {t("webhook.title")}
         </Typography>
       </Box>

@@ -7,7 +7,6 @@ import Container from '@mui/material/Container';
 
 import { layoutClasses } from '../core/classes';
 
-// ----------------------------------------------------------------------
 
 export type DashboardContentProps = ContainerProps & {
   layoutQuery?: Breakpoint;

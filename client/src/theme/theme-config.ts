@@ -3,7 +3,6 @@ import type { CommonColors } from '@mui/material/styles';
 import type { ThemeCssVariables } from './types';
 import type { PaletteColorNoChannels } from './core/palette';
 
-// ----------------------------------------------------------------------
 
 type ThemeConfig = {
   classesPrefix: string;

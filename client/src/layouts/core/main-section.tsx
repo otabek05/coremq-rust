@@ -4,7 +4,6 @@ import { styled } from '@mui/material/styles';
 
 import { layoutClasses } from './classes';
 
-// ----------------------------------------------------------------------
 
 export type MainSectionProps = React.ComponentProps<typeof MainRoot>;
 
@@ -16,7 +15,6 @@ export function MainSection({ children, className, sx, ...other }: MainSectionPr
   );
 }
 
-// ----------------------------------------------------------------------
 
 const MainRoot = styled('main')({
   display: 'flex',
