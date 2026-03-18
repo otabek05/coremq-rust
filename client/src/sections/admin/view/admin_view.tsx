@@ -23,6 +23,7 @@ import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
+import Card from "@mui/material/Card";
 
 import { Iconify } from "src/components/iconify";
 import type { User } from "src/types/users";
@@ -95,31 +96,38 @@ export function AdminView() {
 
   if (loading) {
     return (
-      <Box sx={{ m: 2, display: "flex", justifyContent: "center", py: 10 }}>
-        <CircularProgress />
+      <Box sx={{ m: 3, display: "flex", justifyContent: "center", py: 10 }}>
+        <CircularProgress size={32} sx={{ color: 'primary.main' }} />
       </Box>
     );
   }
 
   return (
-    <Box sx={{ m: 2 }}>
-      <Box sx={{ mb: 2, display: "flex", alignItems: "center" }}>
-        <Typography variant="h5" sx={{ flexGrow: 1 }}>
-          {t("admin.title")} ({users.length})
-        </Typography>
+    <Box sx={{ p: { xs: 2, sm: 3 } }}>
+      <Box sx={{ mb: 3, display: "flex", flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'stretch', sm: 'center' }, gap: { xs: 2, sm: 0 } }}>
+        <Box sx={{ flexGrow: 1 }}>
+          <Typography variant="h4" sx={{ fontWeight: 700, letterSpacing: '-0.01em', fontSize: { xs: '1.4rem', sm: '2.125rem' } }}>
+            {t("admin.title")}
+          </Typography>
+          <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5 }}>
+            {users.length} {users.length === 1 ? 'user' : 'users'}
+          </Typography>
+        </Box>
         <Stack direction="row" spacing={1}>
           <Button
             variant="contained"
-            startIcon={<Iconify icon="mingcute:add-line" />}
+            startIcon={<Iconify icon="mingcute:add-line" width={18} />}
             onClick={() => setDialogOpen(true)}
+            size="small"
           >
             {t("admin.addUser")}
           </Button>
           <Button
             variant="contained"
             color="inherit"
-            startIcon={<Iconify icon="mdi:refresh" />}
+            startIcon={<Iconify icon="mdi:refresh" width={18} />}
             onClick={loadUsers}
+            size="small"
           >
             {t("sessions.refresh")}
           </Button>
@@ -135,43 +143,45 @@ export function AdminView() {
       {users.length === 0 ? (
         <Alert severity="info">{t("admin.empty")}</Alert>
       ) : (
-        <TableContainer sx={{ maxHeight: "75vh", border: "1px solid #ddd" }}>
-          <Table stickyHeader size="small">
-            <TableHead>
-              <TableRow>
-                {[
-                  "#",
-                  t("admin.username"),
-                  t("admin.role"),
-                ].map((h) => (
-                  <TableCell key={h} sx={{ border: "1px solid #ddd", fontWeight: 600 }}>
-                    {h}
-                  </TableCell>
-                ))}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {users.map((user, index) => (
-                <TableRow key={user.username} hover>
-                  <TableCell sx={{ border: "1px solid #eee" }}>{index + 1}</TableCell>
-                  <TableCell sx={{ border: "1px solid #eee" }}>{user.username}</TableCell>
-                  <TableCell sx={{ border: "1px solid #eee" }}>
-                    <Chip
-                      label={user.role}
-                      color={roleColor(user.role) as any}
-                      size="small"
-                    />
-                  </TableCell>
+        <Card>
+          <TableContainer>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell sx={{ width: 50 }}>#</TableCell>
+                  <TableCell>{t("admin.username")}</TableCell>
+                  <TableCell>{t("admin.role")}</TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+              </TableHead>
+              <TableBody>
+                {users.map((user, index) => (
+                  <TableRow key={user.username}>
+                    <TableCell>
+                      <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                        {index + 1}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="subtitle2">{user.username}</Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        label={user.role}
+                        color={roleColor(user.role) as any}
+                        size="small"
+                        sx={{ fontWeight: 700, fontSize: '0.7rem', letterSpacing: '0.04em', textTransform: 'uppercase' }}
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Card>
       )}
 
-      {/* Create User Dialog */}
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="xs" fullWidth>
-        <DialogTitle>{t("admin.addUser")}</DialogTitle>
+        <DialogTitle sx={{ fontWeight: 700 }}>{t("admin.addUser")}</DialogTitle>
         <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 2 }}>
           {formError && <Alert severity="error">{formError}</Alert>}
           <TextField
@@ -202,7 +212,7 @@ export function AdminView() {
             </Select>
           </FormControl>
         </DialogContent>
-        <DialogActions>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
           <Button onClick={() => setDialogOpen(false)} color="inherit">
             {t("admin.cancel")}
           </Button>

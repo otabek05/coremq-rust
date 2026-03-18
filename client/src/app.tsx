@@ -6,7 +6,6 @@ import { usePathname } from 'src/routes/hooks';
 
 import { ThemeProvider } from 'src/theme/theme-provider';
 
-// ----------------------------------------------------------------------
 
 type AppProps = {
   children: React.ReactNode;
@@ -22,7 +21,6 @@ export default function App({ children }: AppProps) {
   );
 }
 
-// ----------------------------------------------------------------------
 
 function useScrollToTop() {
   const pathname = usePathname();

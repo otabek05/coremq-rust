@@ -8,9 +8,10 @@ import Popover from '@mui/material/Popover';
 import MenuList from '@mui/material/MenuList';
 import IconButton from '@mui/material/IconButton';
 import MenuItem, { menuItemClasses } from '@mui/material/MenuItem';
+import Typography from '@mui/material/Typography';
 import { useTranslation } from 'react-i18next';
+import { Icon } from '@iconify/react';
 
-// ----------------------------------------------------------------------
 
 export type LanguagePopoverProps = IconButtonProps & {
   data?: {
@@ -26,14 +27,13 @@ export function LanguagePopover({ data = [], sx, ...other }: LanguagePopoverProp
   const [locale, setLocale] = useState(data[0].value);
   const { i18n } = useTranslation();
 
-
   const handleChangeLang = useCallback(
     (newLang: string) => {
       setLocale(newLang);
-       i18n.changeLanguage(newLang);
+      i18n.changeLanguage(newLang);
       onClose();
     },
-    [onClose]
+    [onClose, i18n]
   );
 
   const currentLang = data.find((lang) => lang.value === locale);
@@ -43,49 +43,8 @@ export function LanguagePopover({ data = [], sx, ...other }: LanguagePopoverProp
       component="img"
       alt={label}
       src={icon}
-      sx={{ width: 26, height: 20, borderRadius: 0.5, objectFit: 'cover' }}
+      sx={{ width: 20, height: 15, borderRadius: 0.25, objectFit: 'cover' }}
     />
-  );
-
-  const renderMenuList = () => (
-    <Popover
-      open={open}
-      anchorEl={anchorEl}
-      onClose={onClose}
-      anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-      transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-    >
-      <MenuList
-        sx={{
-          p: 0.5,
-          gap: 0.5,
-          width: 160,
-          minHeight: 72,
-          display: 'flex',
-          flexDirection: 'column',
-          [`& .${menuItemClasses.root}`]: {
-            px: 1,
-            gap: 2,
-            borderRadius: 0.75,
-            [`&.${menuItemClasses.selected}`]: {
-              bgcolor: 'action.selected',
-              fontWeight: 'fontWeightSemiBold',
-            },
-          },
-        }}
-      >
-        {data?.map((option) => (
-          <MenuItem
-            key={option.value}
-            selected={option.value === currentLang?.value}
-            onClick={() => handleChangeLang(option.value)}
-          >
-            {renderFlag(option.label, option.icon)}
-            {option.label}
-          </MenuItem>
-        ))}
-      </MenuList>
-    </Popover>
   );
 
   return (
@@ -93,21 +52,73 @@ export function LanguagePopover({ data = [], sx, ...other }: LanguagePopoverProp
       <IconButton
         aria-label="Languages button"
         onClick={onOpen}
-        sx={[
-          (theme) => ({
-            p: 0,
-            width: 40,
-            height: 40,
-            ...(open && { bgcolor: theme.vars.palette.action.selected }),
-          }),
-          ...(Array.isArray(sx) ? sx : [sx]),
-        ]}
+        sx={{
+          width: { xs: 32, sm: 36 },
+          height: { xs: 32, sm: 36 },
+          borderRadius: 1,
+          bgcolor: open ? 'rgba(148,163,184,0.14)' : 'rgba(148,163,184,0.08)',
+          border: '1px solid rgba(148,163,184,0.1)',
+          '&:hover': { bgcolor: 'rgba(148,163,184,0.14)' },
+          ...sx,
+        }}
         {...other}
       >
-        {renderFlag(currentLang?.label, currentLang?.icon)}
+        <Box component="span" sx={{ fontSize: '0.75rem', fontWeight: 600, color: '#94A3B8', lineHeight: 1 }}>
+          {currentLang?.value.toUpperCase()}
+        </Box>
       </IconButton>
 
-      {renderMenuList()}
+      <Popover
+        open={open}
+        anchorEl={anchorEl}
+        onClose={onClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+        slotProps={{
+          paper: {
+            sx: { mt: 1 },
+          },
+        }}
+      >
+        <MenuList
+          sx={{
+            p: 0.75,
+            gap: '2px',
+            width: 180,
+            display: 'flex',
+            flexDirection: 'column',
+            [`& .${menuItemClasses.root}`]: {
+              px: 1.25,
+              py: 0.75,
+              gap: 1.5,
+              borderRadius: 1,
+              fontSize: '0.835rem',
+              color: '#94A3B8',
+              '&:hover': { color: '#E2E8F0' },
+              [`&.${menuItemClasses.selected}`]: {
+                bgcolor: 'rgba(148,163,184,0.1)',
+                color: '#E2E8F0',
+                fontWeight: 600,
+              },
+            },
+          }}
+        >
+          {data?.map((option) => (
+            <MenuItem
+              key={option.value}
+              selected={option.value === currentLang?.value}
+              onClick={() => handleChangeLang(option.value)}
+            >
+              <Typography variant="body2" sx={{ fontSize: 'inherit', fontWeight: 'inherit', color: 'inherit' }}>
+                {option.label}
+              </Typography>
+              {option.value === currentLang?.value && (
+                <Icon icon="lucide:check" width={14} style={{ marginLeft: 'auto' }} />
+              )}
+            </MenuItem>
+          ))}
+        </MenuList>
+      </Popover>
     </>
   );
 }

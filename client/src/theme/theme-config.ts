@@ -3,7 +3,6 @@ import type { CommonColors } from '@mui/material/styles';
 import type { ThemeCssVariables } from './types';
 import type { PaletteColorNoChannels } from './core/palette';
 
-// ----------------------------------------------------------------------
 
 type ThemeConfig = {
   classesPrefix: string;
@@ -30,27 +29,27 @@ export const themeConfig: ThemeConfig = {
    * Typography
    *************************************** */
   fontFamily: {
-    primary: 'DM Sans Variable',
+    primary: 'Plus Jakarta Sans Variable',
     secondary: 'Barlow',
   },
   /** **************************************
-   * Palette
+   * Palette — Midnight Observatory
    *************************************** */
   palette: {
     primary: {
-      lighter: '#D0ECFE',
-      light: '#73BAFB',
-      main: '#1877F2',
-      dark: '#0C44AE',
-      darker: '#042174',
+      lighter: '#C8FAD6',
+      light: '#5BE49B',
+      main: '#00A76F',
+      dark: '#007867',
+      darker: '#004B50',
       contrastText: '#FFFFFF',
     },
     secondary: {
-      lighter: '#EFD6FF',
-      light: '#C684FF',
-      main: '#8E33FF',
-      dark: '#5119B7',
-      darker: '#27097A',
+      lighter: '#D6E4FF',
+      light: '#84A9FF',
+      main: '#3366FF',
+      dark: '#1939B7',
+      darker: '#091A7A',
       contrastText: '#FFFFFF',
     },
     info: {
@@ -70,7 +69,7 @@ export const themeConfig: ThemeConfig = {
       contrastText: '#ffffff',
     },
     warning: {
-      lighter: '#FFF5CC',
+      lighter: '#FFF3D8',
       light: '#FFD666',
       main: '#FFAB00',
       dark: '#B76E00',
@@ -86,16 +85,16 @@ export const themeConfig: ThemeConfig = {
       contrastText: '#FFFFFF',
     },
     grey: {
-      '50': '#FCFDFD',
-      '100': '#F9FAFB',
-      '200': '#F4F6F8',
-      '300': '#DFE3E8',
-      '400': '#C4CDD5',
-      '500': '#919EAB',
-      '600': '#637381',
-      '700': '#454F5B',
-      '800': '#1C252E',
-      '900': '#141A21',
+      '50': '#F9FAFB',
+      '100': '#F1F3F6',
+      '200': '#E2E8F0',
+      '300': '#CBD5E1',
+      '400': '#94A3B8',
+      '500': '#64748B',
+      '600': '#475569',
+      '700': '#334155',
+      '800': '#1E293B',
+      '900': '#0F172A',
     },
     common: { black: '#000000', white: '#FFFFFF' },
   },

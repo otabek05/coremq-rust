@@ -11,7 +11,6 @@ import { RouterLink } from 'src/routes/components';
 
 import { logoClasses } from './classes';
 
-// ----------------------------------------------------------------------
 
 export type LogoProps = LinkProps & {
   isSingle?: boolean;
@@ -39,7 +38,7 @@ export function Logo({
         {
           display: 'flex',
           alignItems: 'center',
-          gap: 1,
+          gap: 1.25,
           ...(disabled && { pointerEvents: 'none' }),
         },
         ...(Array.isArray(sx) ? sx : [sx]),
@@ -48,22 +47,31 @@ export function Logo({
     >
       <Box
         sx={{
-          width: 32,
-          height: 32,
-          borderRadius: 1,
+          width: 34,
+          height: 34,
+          borderRadius: 1.5,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          bgcolor: theme.vars.palette.primary.main,
+          background: `linear-gradient(135deg, ${theme.vars.palette.primary.main}, ${theme.vars.palette.primary.dark})`,
           color: theme.vars.palette.primary.contrastText,
-          fontWeight: 700,
-          fontSize: 16,
+          fontWeight: 800,
+          fontSize: 15,
+          letterSpacing: '-0.02em',
+          boxShadow: `0 4px 12px 0 rgba(0, 167, 111, 0.25)`,
         }}
       >
         C
       </Box>
       {!isSingle && (
-        <Typography variant="subtitle1" sx={{ fontWeight: 700, color: theme.vars.palette.text.primary }}>
+        <Typography
+          variant="subtitle1"
+          sx={{
+            fontWeight: 700,
+            color: theme.vars.palette.text.primary,
+            letterSpacing: '-0.01em',
+          }}
+        >
           CoreMQ
         </Typography>
       )}
@@ -71,7 +79,6 @@ export function Logo({
   );
 }
 
-// ----------------------------------------------------------------------
 
 const LogoRoot = styled(Link)(() => ({
   flexShrink: 0,

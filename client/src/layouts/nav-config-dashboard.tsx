@@ -1,7 +1,7 @@
 import { Icon } from '@iconify/react';
 import { useTranslation } from 'react-i18next';
 
-const icon = (name: string) => <Icon icon={name} width={22} />;
+const icon = (name: string) => <Icon icon={name} width={18} />;
 
 export type NavItem = {
   title: string;
@@ -10,17 +10,42 @@ export type NavItem = {
   info?: React.ReactNode;
 };
 
+export type NavGroup = {
+  label: string;
+  items: NavItem[];
+};
+
 export const navData: NavItem[] = [];
 
-export const useNavData = () => {
+export const useNavData = (): NavGroup[] => {
   const { t } = useTranslation();
 
   return [
-    { title: t('nav.home'), path: '/', icon: icon('solar:home-2-bold') },
-    { title: t('nav.sessions'), path: '/sessions', icon: icon('mdi:account-group') },
-    { title: t('nav.listeners'), path: '/listeners', icon: icon('mdi:server-network') },
-    { title: t('nav.admin'), path: '/admins', icon: icon('mdi:shield-account') },
-    { title: t('nav.webhook'), path: '/webhooks', icon: icon('mdi:webhook') },
-    { title: t('nav.websocket'), path: '/websockets', icon: icon('mdi:connection') },
+    {
+      label: t('nav.home'),
+      items: [
+        { title: t('nav.home'), path: '/', icon: icon('lucide:house') },
+      ],
+    },
+    {
+      label: 'Monitoring',
+      items: [
+        { title: t('nav.sessions'), path: '/sessions', icon: icon('lucide:users') },
+        { title: t('nav.listeners'), path: '/listeners', icon: icon('lucide:radio-tower') },
+      ],
+    },
+    {
+      label: 'Tools',
+      items: [
+        { title: t('nav.websocket'), path: '/websockets', icon: icon('lucide:cable') },
+        { title: t('nav.webhook'), path: '/webhooks', icon: icon('lucide:webhook') },
+      ],
+    },
+    {
+      label: 'Settings',
+      items: [
+        { title: t('nav.admin'), path: '/admins', icon: icon('lucide:shield') },
+      ],
+    },
   ];
 };

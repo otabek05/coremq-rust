@@ -1,4 +1,4 @@
-import type { CSSObject, Breakpoint } from '@mui/material/styles';
+import type { Breakpoint } from '@mui/material/styles';
 
 import { merge } from 'es-toolkit';
 
@@ -20,7 +20,6 @@ import { LinearProgress } from '@mui/material';
 import { useRouter } from 'src/routes/hooks';
 import Cookies from 'js-cookie';
 
-// ----------------------------------------------------------------------
 
 type LayoutBaseProps = Pick<LayoutSectionProps, 'sx' | 'children' | 'cssVars'>;
 
@@ -40,34 +39,44 @@ export function AuthLayout({
   slotProps,
   layoutQuery = 'md',
 }: AuthLayoutProps) {
-  const renderHeader = () => {
-    const router = useRouter();
-    const [loading, setLoading] = useState(true);
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-      const token = Cookies.get('access_token');
-      if (token) {
-        router.push('/');
-      } else {
-        setLoading(false);
-      }
-    }, [router]);
-
-    if (loading) {
-      return (
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            height: '100vh',
-          }}
-        >
-          <LinearProgress sx={{ width: 1, maxWidth: 320 }} />
-        </Box>
-      );
+  useEffect(() => {
+    const token = Cookies.get('access_token');
+    if (token) {
+      router.push('/');
+    } else {
+      setLoading(false);
     }
+  }, [router]);
 
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100vh',
+          bgcolor: '#0B0F19',
+        }}
+      >
+        <LinearProgress
+          sx={{
+            width: 1,
+            maxWidth: 320,
+            '& .MuiLinearProgress-bar': {
+              backgroundColor: '#00A76F',
+            },
+            backgroundColor: 'rgba(0, 167, 111, 0.15)',
+          }}
+        />
+      </Box>
+    );
+  }
+
+  const renderHeader = () => {
     const headerSlotProps: HeaderSectionProps['slotProps'] = { container: { maxWidth: false } };
 
     const headerSlots: HeaderSectionProps['slots'] = {
@@ -91,8 +100,6 @@ export function AuthLayout({
       />
     );
   };
-
-  const renderFooter = () => null;
 
   const renderMain = () => (
     <MainSection
@@ -118,12 +125,23 @@ export function AuthLayout({
   return (
     <LayoutSection
       headerSection={renderHeader()}
-      footerSection={renderFooter()}
+      footerSection={null}
       cssVars={{ '--layout-auth-content-width': '420px', ...cssVars }}
       sx={[
         () => ({
           position: 'relative',
-          '&::before': backgroundStyles(),
+          minHeight: '100vh',
+          background: '#0B0F19',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'radial-gradient(ellipse at 50% 0%, rgba(0, 167, 111, 0.08) 0%, transparent 60%)',
+            pointerEvents: 'none',
+          },
         }),
         ...(Array.isArray(sx) ? sx : [sx]),
       ]}
@@ -132,18 +150,3 @@ export function AuthLayout({
     </LayoutSection>
   );
 }
-
-// ----------------------------------------------------------------------
-
-const backgroundStyles = (): CSSObject => ({
-  zIndex: 1,
-  opacity: 0.24,
-  width: '100%',
-  height: '100%',
-  content: "''",
-  position: 'absolute',
-  backgroundSize: 'cover',
-  backgroundRepeat: 'no-repeat',
-  backgroundPosition: 'center center',
-  backgroundImage: 'url(/assets/background/overlay.jpg)',
-});

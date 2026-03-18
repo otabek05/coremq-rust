@@ -17,5 +17,5 @@ export async function fetchSessions(
 }
 
 export async function deleteSession(clientId: string) {
-  await api.delete(`/api/sessions/${clientId}`);
+  await api.delete(`/api/v1/sessions/${clientId}`);
 }

@@ -8,7 +8,6 @@ import { createTheme } from './create-theme';
 import type {} from './extend-theme-types';
 import type { ThemeOptions } from './types';
 
-// ----------------------------------------------------------------------
 
 export type ThemeProviderProps = Partial<MuiThemeProviderProps> & {
   themeOverrides?: ThemeOptions;

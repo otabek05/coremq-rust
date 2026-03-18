@@ -33,6 +33,7 @@ impl RouterHandler  {
     pub fn get_session_routes(&self) -> Router<ApiState> {
         Router::new()
         .route("/sessions", get(sessions::get_sessions))
+        .route("/sessions/:client_id", delete(sessions::disconnect_session))
     }
 
     pub fn get_user_routes(&self) -> Router<ApiState> {

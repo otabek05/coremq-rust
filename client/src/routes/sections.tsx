@@ -11,7 +11,6 @@ import { AuthLayout } from 'src/layouts/auth';
 import { DashboardLayout } from 'src/layouts/dashboard';
 import ProtectedRoute from './protected_route';
 
-// ----------------------------------------------------------------------
 
 export const DashboardPage = lazy(() => import('src/pages/home'));
 export const AdminPage = lazy(() => import('src/pages/admin'));
@@ -23,7 +22,6 @@ export const WebsocketPage = lazy(()=> import('src/pages/websocket'));
 export const Page404 = lazy(() => import('src/pages/page-not-found'));
 
 
-// ----------------------------------------------------------------------
 
 const renderFallback = () => (
   <Box
@@ -45,7 +43,6 @@ const renderFallback = () => (
   </Box>
 );
 
-// ----------------------------------------------------------------------
 
 export const routesSection: RouteObject[] = [
   {

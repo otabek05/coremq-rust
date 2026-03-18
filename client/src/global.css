@@ -1,7 +1,8 @@
 /** **************************************
 * Fonts: app
 *************************************** */
-@import '@fontsource-variable/dm-sans';
+@import '@fontsource-variable/plus-jakarta-sans';
+@import '@fontsource-variable/jetbrains-mono';
 
 @import '@fontsource/barlow/400.css';
 @import '@fontsource/barlow/500.css';
@@ -30,6 +31,10 @@ body,
   min-height: 100%;
   flex-direction: column;
 }
+body {
+  background-color: #0B0F19;
+  color: #E2E8F0;
+}
 img {
   max-width: 100%;
   vertical-align: middle;
@@ -50,4 +55,20 @@ input[type='number']::-webkit-outer-spin-button {
 input[type='number']::-webkit-inner-spin-button {
   margin: 0;
   -webkit-appearance: none;
+}
+
+/* Custom scrollbar for dark theme */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.2);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.35);
 }

@@ -11,7 +11,6 @@ import { customShadows } from './core/custom-shadows';
 
 import type { ThemeOptions } from './types';
 
-// ----------------------------------------------------------------------
 
 export const baseTheme: ThemeOptions = {
   colorSchemes: {
@@ -23,11 +22,10 @@ export const baseTheme: ThemeOptions = {
   },
   components,
   typography,
-  shape: { borderRadius: 8 },
+  shape: { borderRadius: 6 },
   cssVariables: themeConfig.cssVariables,
 };
 
-// ----------------------------------------------------------------------
 
 type CreateThemeProps = {
   themeOverrides?: ThemeOptions;
