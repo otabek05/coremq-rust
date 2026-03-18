@@ -237,6 +237,7 @@ const MuiDrawer: Components<Theme>['MuiDrawer'] = {
   styleOverrides: {
     paper: {
       backgroundColor: '#0B0F19',
+      boxShadow: 'none',
     },
   },
 };

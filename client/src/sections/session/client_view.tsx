@@ -284,7 +284,8 @@ export function SessionView() {
           '& .MuiDrawer-paper': {
             width: { xs: '100%', sm: 400 },
             bgcolor: '#131825',
-            borderLeft: '1px solid rgba(148,163,184,0.1)',
+            borderLeft: '1px solid rgba(148,163,184,0.12)',
+            boxShadow: 'none',
           },
         }}
       >
