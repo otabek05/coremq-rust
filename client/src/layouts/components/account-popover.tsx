@@ -64,12 +64,13 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
           width: 40,
           height: 40,
           background: (theme) =>
-            `conic-gradient(${theme.vars.palette.primary.light}, ${theme.vars.palette.warning.light}, ${theme.vars.palette.primary.light})`,
+            `linear-gradient(135deg, ${theme.vars.palette.primary.main}, ${theme.vars.palette.primary.dark})`,
+          borderRadius: 1.5,
           ...sx,
         }}
         {...other}
       >
-        <Avatar sx={{ width: 1, height: 1, fontSize: 14, fontWeight: 700 }}>
+        <Avatar sx={{ width: 1, height: 1, fontSize: 13, fontWeight: 700, bgcolor: 'transparent', color: 'common.white', borderRadius: 1.25 }}>
           MQ
         </Avatar>
       </IconButton>

@@ -10,16 +10,16 @@ export function WebhookView() {
   const { t } = useTranslation();
 
   return (
-    <Box sx={{ m: 2 }}>
-      <Box sx={{ mb: 2, display: "flex", alignItems: "center" }}>
-        <Typography variant="h5" sx={{ flexGrow: 1 }}>
+    <Box sx={{ p: 3 }}>
+      <Box sx={{ mb: 3 }}>
+        <Typography variant="h4" sx={{ fontWeight: 700, letterSpacing: '-0.01em' }}>
           {t("webhook.title")}
         </Typography>
       </Box>
 
       <Alert
         severity="info"
-        icon={<Iconify icon="mdi:webhook" width={24} />}
+        icon={<Iconify icon="mdi:webhook" width={22} />}
       >
         {t("webhook.comingSoon")}
       </Alert>

@@ -53,16 +53,18 @@ export function SignInView() {
     <>
       <Box
         sx={{
-          gap: 1.5,
+          gap: 1,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           mb: 5,
         }}
       >
-        <Typography variant="h5">Sign in to CoreMQ</Typography>
+        <Typography variant="h4" sx={{ fontWeight: 800, letterSpacing: '-0.02em' }}>
+          Sign in
+        </Typography>
         <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-          MQTT Broker Admin Panel
+          CoreMQ Broker Admin Panel
         </Typography>
       </Box>
 
@@ -78,7 +80,7 @@ export function SignInView() {
           label="Username"
           value={form.username}
           onChange={handleChange}
-          sx={{ mb: 3 }}
+          sx={{ mb: 2.5 }}
           slotProps={{ inputLabel: { shrink: true } }}
         />
 
@@ -100,6 +102,7 @@ export function SignInView() {
                   <IconButton
                     onClick={() => setShowPassword(!showPassword)}
                     edge="end"
+                    sx={{ color: 'text.secondary' }}
                   >
                     <Iconify icon={showPassword ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
                   </IconButton>
@@ -120,10 +123,14 @@ export function SignInView() {
           fullWidth
           size="large"
           type="button"
-          color="inherit"
+          color="primary"
           variant="contained"
           onClick={handleSignIn}
           disabled={loading}
+          sx={{
+            py: 1.5,
+            fontSize: '0.95rem',
+          }}
         >
           {loading ? 'Signing in...' : 'Sign in'}
         </Button>

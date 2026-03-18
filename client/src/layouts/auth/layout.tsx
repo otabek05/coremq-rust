@@ -60,9 +60,19 @@ export function AuthLayout({
           alignItems: 'center',
           justifyContent: 'center',
           height: '100vh',
+          bgcolor: '#0B0F19',
         }}
       >
-        <LinearProgress sx={{ width: 1, maxWidth: 320 }} />
+        <LinearProgress
+          sx={{
+            width: 1,
+            maxWidth: 320,
+            '& .MuiLinearProgress-bar': {
+              backgroundColor: '#00A76F',
+            },
+            backgroundColor: 'rgba(0, 167, 111, 0.15)',
+          }}
+        />
       </Box>
     );
   }
@@ -122,7 +132,17 @@ export function AuthLayout({
         () => ({
           position: 'relative',
           minHeight: '100vh',
-          background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+          background: '#0B0F19',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'radial-gradient(ellipse at 50% 0%, rgba(0, 167, 111, 0.08) 0%, transparent 60%)',
+            pointerEvents: 'none',
+          },
         }),
         ...(Array.isArray(sx) ? sx : [sx]),
       ]}

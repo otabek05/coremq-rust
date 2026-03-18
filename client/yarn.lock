@@ -319,6 +319,16 @@
   resolved "https://registry.npmjs.org/@fontsource-variable/dm-sans/-/dm-sans-5.2.5.tgz"
   integrity sha512-ynWdb1Ncn5ywUOE6OkTsvgjkiZKj+xM/GS2iVE47MBvS3AlfOSyOy3xynfkQsM3ngaxdCamT/06hZGAgPmao0A==
 
+"@fontsource-variable/jetbrains-mono@^5.2.8":
+  version "5.2.8"
+  resolved "https://registry.yarnpkg.com/@fontsource-variable/jetbrains-mono/-/jetbrains-mono-5.2.8.tgz#73031a6973a09b0590e8877ad13a0312ef711681"
+  integrity sha512-WBA9elru6Jdp5df2mES55wuOO0WIrn3kpXnI4+W2ek5u3ZgLS9XS4gmIlcQhiZOWEKl95meYdvK7xI+ETLCq/Q==
+
+"@fontsource-variable/plus-jakarta-sans@^5.2.8":
+  version "5.2.8"
+  resolved "https://registry.yarnpkg.com/@fontsource-variable/plus-jakarta-sans/-/plus-jakarta-sans-5.2.8.tgz#1c94a15ba24f2553ec1ba59bea442bb96c9975c3"
+  integrity sha512-iQecBizIdZxezODNHzOn4SvvRMrZL/S8k4MEXGDynCmUrImVW0VmX+tIAMqnADwH4haXlHSXqMgU6+kcfBQJdw==
+
 "@fontsource/barlow@^5.2.5":
   version "5.2.5"
   resolved "https://registry.npmjs.org/@fontsource/barlow/-/barlow-5.2.5.tgz"

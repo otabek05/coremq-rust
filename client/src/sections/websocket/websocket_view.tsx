@@ -6,7 +6,8 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import MenuItem from '@mui/material/MenuItem';
 import Divider from '@mui/material/Divider';
-import Paper from '@mui/material/Paper';
+import Card from '@mui/material/Card';
+import Chip from '@mui/material/Chip';
 import mqtt, { MqttClient, IClientOptions } from 'mqtt';
 import { useTranslation } from 'react-i18next';
 
@@ -134,90 +135,140 @@ export function WebsocketView() {
   useEffect(() => { pubConsoleRef.current?.scrollTo({ top: 0, behavior: 'smooth' }); }, [pubLogs]);
 
   return (
-    <Box p={4}>
-      <Typography variant="h5" gutterBottom>{t('websocket.title')}</Typography>
+    <Box sx={{ p: 3 }}>
+      <Box sx={{ mb: 3 }}>
+        <Typography variant="h4" sx={{ fontWeight: 700, letterSpacing: '-0.01em' }}>
+          {t('websocket.title')}
+        </Typography>
+        <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 0.5 }}>
+          <Chip
+            label={connected ? 'Connected' : 'Disconnected'}
+            color={connected ? 'success' : 'default'}
+            size="small"
+            variant="filled"
+            sx={{ fontWeight: 600, fontSize: '0.7rem' }}
+          />
+          {connected && (
+            <Typography variant="caption" sx={{ color: 'text.secondary', fontFamily: 'JetBrains Mono Variable' }}>
+              {fullUrl}
+            </Typography>
+          )}
+        </Stack>
+      </Box>
 
       {/* Connection Panel */}
-      <Paper sx={{ p: 2, mb: 4 }}>
-        <Stack spacing={1} direction="row" flexWrap="wrap" alignItems="center">
-          <TextField size="small" label={t('websocket.url')} value={url} onChange={(e) => setUrl(e.target.value)} disabled={connected || connecting} />
-          <TextField size="small" label={t('websocket.port')} value={port} onChange={(e) => setPort(e.target.value)} sx={{ width: 100 }} disabled={connected || connecting} />
-          <TextField size="small" label={t('websocket.path')} value={path} onChange={(e) => setPath(e.target.value)} sx={{ width: 120 }} disabled={connected || connecting} />
+      <Card sx={{ p: 2.5, mb: 3, bgcolor: '#1E293B', border: '1px solid rgba(148,163,184,0.12)' }}>
+        <Stack spacing={1.5} direction="row" flexWrap="wrap" alignItems="center">
+          <TextField size="small" label={t('websocket.url')} value={url} onChange={(e) => setUrl(e.target.value)} disabled={connected || connecting} sx={{ minWidth: 140 }} />
+          <TextField size="small" label={t('websocket.port')} value={port} onChange={(e) => setPort(e.target.value)} sx={{ width: 90 }} disabled={connected || connecting} />
+          <TextField size="small" label={t('websocket.path')} value={path} onChange={(e) => setPath(e.target.value)} sx={{ width: 100 }} disabled={connected || connecting} />
           <TextField size="small" select label={t('websocket.protocol')} value={protocol} onChange={(e) => setProtocol(e.target.value as any)} sx={{ width: 80 }} disabled={connected || connecting}>
             <MenuItem value="ws">ws</MenuItem>
             <MenuItem value="wss">wss</MenuItem>
           </TextField>
-          <TextField size="small" label={t('websocket.username')} value={username} onChange={(e) => setUsername(e.target.value)} disabled={connected || connecting} />
-          <TextField size="small" label={t('websocket.password')} type="password" value={password} onChange={(e) => setPassword(e.target.value)} disabled={connected || connecting} />
-          <TextField size="small" label={t('websocket.clientId')} value={clientId} onChange={(e) => setClientId(e.target.value)} disabled={connected || connecting} />
-          <Button variant="contained" color="success" onClick={handleConnect} disabled={connected || connecting}>
+          <TextField size="small" label={t('websocket.username')} value={username} onChange={(e) => setUsername(e.target.value)} disabled={connected || connecting} sx={{ minWidth: 120 }} />
+          <TextField size="small" label={t('websocket.password')} type="password" value={password} onChange={(e) => setPassword(e.target.value)} disabled={connected || connecting} sx={{ minWidth: 120 }} />
+          <TextField size="small" label={t('websocket.clientId')} value={clientId} onChange={(e) => setClientId(e.target.value)} disabled={connected || connecting} sx={{ minWidth: 160 }} />
+          <Button variant="contained" color="primary" onClick={handleConnect} disabled={connected || connecting} size="small">
             {connecting ? t('websocket.connecting') : t('websocket.connect')}
           </Button>
-          <Button variant="outlined" color="error" onClick={handleDisconnect} disabled={!connected && !connecting}>{t('websocket.disconnect')}</Button>
+          <Button variant="outlined" color="error" onClick={handleDisconnect} disabled={!connected && !connecting} size="small">{t('websocket.disconnect')}</Button>
         </Stack>
-      </Paper>
+      </Card>
 
-      <Stack direction="row" spacing={4}>
+      <Stack direction={{ xs: 'column', md: 'row' }} spacing={3}>
         {/* Publish Panel */}
-        <Paper sx={{ p: 2, width: 300 }}>
-          <Typography variant="h6">{t('websocket.publish')}</Typography>
-          <TextField size="small" fullWidth label={t('websocket.topic')} value={pubTopic} onChange={(e) => setPubTopic(e.target.value)} sx={{ mb: 1 }} disabled={!connected} />
-          <TextField size="small" fullWidth label={t('websocket.message')} value={pubMsg} onChange={(e) => setPubMsg(e.target.value)} sx={{ mb: 1 }} disabled={!connected} />
-          <TextField size="small" select label={t('websocket.qos')} value={pubQoS} onChange={(e) => setPubQoS(Number(e.target.value) as QoS)} sx={{ mb: 1, width: 100 }} disabled={!connected}>
+        <Card sx={{ p: 2.5, width: { xs: '100%', md: 320 }, flexShrink: 0, bgcolor: '#1E293B', border: '1px solid rgba(148,163,184,0.12)' }}>
+          <Typography variant="h6" sx={{ mb: 1.5 }}>{t('websocket.publish')}</Typography>
+          <TextField size="small" fullWidth label={t('websocket.topic')} value={pubTopic} onChange={(e) => setPubTopic(e.target.value)} sx={{ mb: 1.5 }} disabled={!connected} />
+          <TextField size="small" fullWidth label={t('websocket.message')} value={pubMsg} onChange={(e) => setPubMsg(e.target.value)} sx={{ mb: 1.5 }} disabled={!connected} />
+          <TextField size="small" select label={t('websocket.qos')} value={pubQoS} onChange={(e) => setPubQoS(Number(e.target.value) as QoS)} sx={{ mb: 1.5, width: 100 }} disabled={!connected}>
             <MenuItem value={0}>0</MenuItem>
             <MenuItem value={1}>1</MenuItem>
             <MenuItem value={2}>2</MenuItem>
           </TextField>
-          <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
-            <Button variant="contained" onClick={handlePublish} disabled={!connected}>{t('websocket.publish')}</Button>
-            <Button variant="outlined" onClick={clearPubLogs}>{t('websocket.clear')}</Button>
+          <Stack direction="row" spacing={1} sx={{ mb: 1.5 }}>
+            <Button variant="contained" onClick={handlePublish} disabled={!connected} size="small">{t('websocket.publish')}</Button>
+            <Button variant="outlined" color="inherit" onClick={clearPubLogs} size="small">{t('websocket.clear')}</Button>
           </Stack>
-          <Divider sx={{ my: 1 }} />
-          <Typography variant="subtitle2">{t('websocket.publishConsole')}</Typography>
-          <Box ref={pubConsoleRef} sx={{ border: '1px solid #ccc', p: 1, height: 200, overflowY: 'auto', background: '#f9f9f9' }}>
+          <Divider sx={{ my: 1.5, borderColor: 'rgba(148,163,184,0.15)' }} />
+          <Typography variant="overline" sx={{ mb: 1, display: 'block' }}>{t('websocket.publishConsole')}</Typography>
+          <Box
+            ref={pubConsoleRef}
+            sx={{
+              borderRadius: 1.5,
+              p: 1.5,
+              height: 200,
+              overflowY: 'auto',
+              bgcolor: '#131825',
+              border: '1px solid rgba(148,163,184,0.1)',
+            }}
+          >
             {pubLogs.map((log, i) => (
-              <Box key={i} sx={{ mb: 0.5 }}>
-                <Typography variant="caption" color="text.secondary">{log.time}</Typography>
-                <Typography variant="body2"><b>{log.topic}</b> [QoS {log.qos}]: {log.payload}</Typography>
+              <Box key={i} sx={{ mb: 0.75 }}>
+                <Typography variant="caption" sx={{ color: 'text.secondary', fontFamily: 'JetBrains Mono Variable', fontSize: '0.7rem' }}>{log.time}</Typography>
+                <Typography variant="body2" sx={{ fontFamily: 'JetBrains Mono Variable', fontSize: '0.78rem' }}>
+                  <Box component="span" sx={{ color: 'primary.light' }}>{log.topic}</Box>
+                  <Box component="span" sx={{ color: 'text.secondary' }}> [QoS {log.qos}]</Box>
+                  : {log.payload}
+                </Typography>
               </Box>
             ))}
           </Box>
-        </Paper>
+        </Card>
 
         {/* Subscribe Panel */}
-        <Paper sx={{ p: 2, flex: 1, display: 'flex', flexDirection: 'column', height: 600 }}>
-          <Typography variant="h6">{t('websocket.subscribe')}</Typography>
-          <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
+        <Card sx={{ p: 2.5, flex: 1, display: 'flex', flexDirection: 'column', minHeight: 500, bgcolor: '#1E293B', border: '1px solid rgba(148,163,184,0.12)' }}>
+          <Typography variant="h6" sx={{ mb: 1.5 }}>{t('websocket.subscribe')}</Typography>
+          <Stack direction="row" spacing={1} sx={{ mb: 1.5 }}>
             <TextField size="small" fullWidth placeholder={t('websocket.topic')} value={newSubTopic} onChange={(e) => setNewSubTopic(e.target.value)} disabled={!connected} />
             <TextField size="small" select value={newSubQoS} onChange={(e) => setNewSubQoS(Number(e.target.value) as QoS)} sx={{ width: 80 }} disabled={!connected}>
               <MenuItem value={0}>0</MenuItem>
               <MenuItem value={1}>1</MenuItem>
               <MenuItem value={2}>2</MenuItem>
             </TextField>
-            <Button variant="contained" onClick={handleAddSub} disabled={!connected}>{t('websocket.add')}</Button>
+            <Button variant="contained" onClick={handleAddSub} disabled={!connected} size="small">{t('websocket.add')}</Button>
           </Stack>
-          <Stack spacing={1} sx={{ mb: 1 }}>
-            {subTopics.map((s) => (
-              <Stack key={s.topic} direction="row" justifyContent="space-between">
-                <Typography>{s.topic} [QoS {s.qos}]</Typography>
-                <Button size="small" color="error" onClick={() => handleRemoveSub(s.topic)} disabled={!connected}>{t('websocket.remove')}</Button>
-              </Stack>
-            ))}
+          {subTopics.length > 0 && (
+            <Stack spacing={0.5} sx={{ mb: 1.5 }}>
+              {subTopics.map((s) => (
+                <Stack key={s.topic} direction="row" justifyContent="space-between" alignItems="center" sx={{ px: 1, py: 0.5, borderRadius: 1, bgcolor: '#131825', border: '1px solid rgba(148,163,184,0.08)' }}>
+                  <Typography variant="body2" sx={{ fontFamily: 'JetBrains Mono Variable', fontSize: '0.8rem' }}>
+                    {s.topic} <Box component="span" sx={{ color: 'text.secondary' }}>[QoS {s.qos}]</Box>
+                  </Typography>
+                  <Button size="small" color="error" onClick={() => handleRemoveSub(s.topic)} disabled={!connected} sx={{ minWidth: 'auto', fontSize: '0.75rem' }}>{t('websocket.remove')}</Button>
+                </Stack>
+              ))}
+            </Stack>
+          )}
+          <Stack direction="row" spacing={1} sx={{ mb: 1.5 }}>
+            <Button variant="outlined" color="inherit" onClick={clearSubLogs} size="small">{t('websocket.clear')}</Button>
           </Stack>
-          <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
-            <Button variant="outlined" onClick={clearSubLogs}>{t('websocket.clear')}</Button>
-          </Stack>
-          <Divider sx={{ my: 1 }} />
-          <Typography variant="subtitle2">{t('websocket.subscribeConsole')}</Typography>
-          <Box ref={subConsoleRef} sx={{ flex: 1, border: '1px solid #ccc', p: 1, overflowY: 'auto', background: '#f9f9f9' }}>
+          <Divider sx={{ my: 1, borderColor: 'rgba(148,163,184,0.15)' }} />
+          <Typography variant="overline" sx={{ mb: 1, display: 'block' }}>{t('websocket.subscribeConsole')}</Typography>
+          <Box
+            ref={subConsoleRef}
+            sx={{
+              flex: 1,
+              borderRadius: 1.5,
+              p: 1.5,
+              overflowY: 'auto',
+              bgcolor: '#131825',
+              border: '1px solid rgba(148,163,184,0.1)',
+            }}
+          >
             {subLogs.map((log, i) => (
-              <Box key={i} sx={{ mb: 0.5 }}>
-                <Typography variant="caption" color="text.secondary">{log.time}</Typography>
-                <Typography variant="body2"><b>{log.topic}</b> [QoS {log.qos}]: {log.payload}</Typography>
+              <Box key={i} sx={{ mb: 0.75 }}>
+                <Typography variant="caption" sx={{ color: 'text.secondary', fontFamily: 'JetBrains Mono Variable', fontSize: '0.7rem' }}>{log.time}</Typography>
+                <Typography variant="body2" sx={{ fontFamily: 'JetBrains Mono Variable', fontSize: '0.78rem' }}>
+                  <Box component="span" sx={{ color: 'primary.light' }}>{log.topic}</Box>
+                  <Box component="span" sx={{ color: 'text.secondary' }}> [QoS {log.qos}]</Box>
+                  : {log.payload}
+                </Typography>
               </Box>
             ))}
           </Box>
-        </Paper>
+        </Card>
       </Stack>
     </Box>
   );

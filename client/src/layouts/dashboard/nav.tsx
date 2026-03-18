@@ -40,17 +40,17 @@ export function NavDesktop({
     <Box
       sx={{
         pt: 2.5,
-        px: 2.5,
+        px: 2,
         top: 0,
         left: 0,
         height: 1,
         display: 'none',
         position: 'fixed',
         flexDirection: 'column',
-        bgcolor: 'background.default',
+        bgcolor: '#0B0F19',
         zIndex: 'var(--layout-nav-zIndex)',
         width: 'var(--layout-nav-vertical-width)',
-        borderRight: `1px solid ${varAlpha(theme.vars.palette.grey['500Channel'], 0.08)}`,
+        borderRight: `1px solid ${varAlpha(theme.vars.palette.grey['400Channel'], 0.06)}`,
         [theme.breakpoints.up(layoutQuery)]: {
           display: 'flex',
         },
@@ -86,8 +86,9 @@ export function NavMobile({
       sx={{
         [`& .${drawerClasses.paper}`]: {
           pt: 2.5,
-          px: 2.5,
+          px: 2,
           overflow: 'unset',
+          bgcolor: '#0B0F19',
           width: 'var(--layout-nav-mobile-width)',
           ...sx,
         },
@@ -105,7 +106,9 @@ export function NavContent({ data, slots, sx }: NavContentProps) {
 
   return (
     <>
-      <Logo isSingle={false} />
+      <Box sx={{ px: 0.5 }}>
+        <Logo isSingle={false} />
+      </Box>
 
       {slots?.topArea}
 
@@ -143,25 +146,32 @@ export function NavContent({ data, slots, sx }: NavContentProps) {
                       (theme) => ({
                         pl: 2,
                         py: 1,
-                        gap: 2,
+                        gap: 1.5,
                         pr: 1.5,
-                        borderRadius: 0.75,
+                        borderRadius: 1.5,
                         typography: 'body2',
                         fontWeight: 'fontWeightMedium',
                         color: theme.vars.palette.text.secondary,
                         minHeight: 44,
+                        transition: 'all 0.15s ease',
                         ...(isActive && {
                           fontWeight: 'fontWeightSemiBold',
-                          color: theme.vars.palette.primary.main,
-                          bgcolor: varAlpha(theme.vars.palette.primary.mainChannel, 0.08),
+                          color: theme.vars.palette.primary.light,
+                          bgcolor: varAlpha(theme.vars.palette.primary.mainChannel, 0.1),
                           '&:hover': {
                             bgcolor: varAlpha(theme.vars.palette.primary.mainChannel, 0.16),
+                          },
+                        }),
+                        ...(!isActive && {
+                          '&:hover': {
+                            color: theme.vars.palette.text.primary,
+                            bgcolor: varAlpha(theme.vars.palette.grey['400Channel'], 0.06),
                           },
                         }),
                       }),
                     ]}
                   >
-                    <Box component="span" sx={{ width: 24, height: 24 }}>
+                    <Box component="span" sx={{ width: 22, height: 22, opacity: isActive ? 1 : 0.6 }}>
                       {item.icon}
                     </Box>
 
