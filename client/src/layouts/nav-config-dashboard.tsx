@@ -31,6 +31,7 @@ export const useNavData = (): NavGroup[] => {
       label: 'Monitoring',
       items: [
         { title: t('nav.sessions'), path: '/sessions', icon: icon('lucide:users') },
+        { title: t('nav.topics'), path: '/topics', icon: icon('lucide:hash') },
         { title: t('nav.listeners'), path: '/listeners', icon: icon('lucide:radio-tower') },
       ],
     },
