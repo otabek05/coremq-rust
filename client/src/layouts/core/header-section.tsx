@@ -11,141 +11,138 @@ import Container from '@mui/material/Container';
 
 import { layoutClasses } from './classes';
 
-
 export type HeaderSectionProps = AppBarProps & {
-  layoutQuery?: Breakpoint;
-  disableOffset?: boolean;
-  disableElevation?: boolean;
-  slots?: {
-    leftArea?: React.ReactNode;
-    rightArea?: React.ReactNode;
-    topArea?: React.ReactNode;
-    centerArea?: React.ReactNode;
-    bottomArea?: React.ReactNode;
-  };
-  slotProps?: {
-    container?: ContainerProps;
-    centerArea?: React.ComponentProps<'div'> & { sx?: SxProps<Theme> };
-  };
+    layoutQuery?: Breakpoint;
+    disableOffset?: boolean;
+    disableElevation?: boolean;
+    slots?: {
+        leftArea?: React.ReactNode;
+        rightArea?: React.ReactNode;
+        topArea?: React.ReactNode;
+        centerArea?: React.ReactNode;
+        bottomArea?: React.ReactNode;
+    };
+    slotProps?: {
+        container?: ContainerProps;
+        centerArea?: React.ComponentProps<'div'> & { sx?: SxProps<Theme> };
+    };
 };
 
 export function HeaderSection({
-  sx,
-  slots,
-  slotProps,
-  className,
-  disableOffset,
-  disableElevation,
-  layoutQuery = 'md',
-  ...other
+    sx,
+    slots,
+    slotProps,
+    className,
+    disableOffset,
+    disableElevation,
+    layoutQuery = 'md',
+    ...other
 }: HeaderSectionProps) {
-  const { offsetTop: isOffset } = useScrollOffsetTop();
+    const { offsetTop: isOffset } = useScrollOffsetTop();
 
-  return (
-    <HeaderRoot
-      position="sticky"
-      color="transparent"
-      isOffset={isOffset}
-      disableOffset={disableOffset}
-      disableElevation={disableElevation}
-      className={mergeClasses([layoutClasses.header, className])}
-      sx={[
-        (theme) => ({
-          ...(isOffset && {
-            '--color': `var(--offset-color, ${theme.vars.palette.text.primary})`,
-          }),
-        }),
-        ...(Array.isArray(sx) ? sx : [sx]),
-      ]}
-      {...other}
-    >
-      {slots?.topArea}
+    return (
+        <HeaderRoot
+            position="sticky"
+            color="transparent"
+            isOffset={isOffset}
+            disableOffset={disableOffset}
+            disableElevation={disableElevation}
+            className={mergeClasses([layoutClasses.header, className])}
+            sx={[
+                (theme) => ({
+                    ...(isOffset && {
+                        '--color': `var(--offset-color, ${theme.vars.palette.text.primary})`,
+                    }),
+                }),
+                ...(Array.isArray(sx) ? sx : [sx]),
+            ]}
+            {...other}
+        >
+            {slots?.topArea}
 
-      <HeaderContainer layoutQuery={layoutQuery} {...slotProps?.container}>
-        {slots?.leftArea}
+            <HeaderContainer layoutQuery={layoutQuery} {...slotProps?.container}>
+                {slots?.leftArea}
 
-        <HeaderCenterArea {...slotProps?.centerArea}>{slots?.centerArea}</HeaderCenterArea>
+                <HeaderCenterArea {...slotProps?.centerArea}>{slots?.centerArea}</HeaderCenterArea>
 
-        {slots?.rightArea}
-      </HeaderContainer>
+                {slots?.rightArea}
+            </HeaderContainer>
 
-      {slots?.bottomArea}
-    </HeaderRoot>
-  );
+            {slots?.bottomArea}
+        </HeaderRoot>
+    );
 }
 
-
 type HeaderRootProps = Pick<HeaderSectionProps, 'disableOffset' | 'disableElevation'> & {
-  isOffset: boolean;
+    isOffset: boolean;
 };
 
 const HeaderRoot = styled(AppBar, {
-  shouldForwardProp: (prop: string) =>
-    !['isOffset', 'disableOffset', 'disableElevation', 'sx'].includes(prop),
+    shouldForwardProp: (prop: string) => !['isOffset', 'disableOffset', 'disableElevation', 'sx'].includes(prop),
 })<HeaderRootProps>(({ isOffset, disableOffset, disableElevation, theme }) => {
-  const pauseZindex = { top: -1, bottom: -2 };
+    const pauseZindex = { top: -1, bottom: -2 };
 
-  const pauseStyles: CSSObject = {
-    opacity: 0,
-    content: '""',
-    visibility: 'hidden',
-    position: 'absolute',
-    transition: theme.transitions.create(['opacity', 'visibility'], {
-      easing: theme.transitions.easing.easeInOut,
-      duration: theme.transitions.duration.shorter,
-    }),
-  };
+    const pauseStyles: CSSObject = {
+        opacity: 0,
+        content: '""',
+        visibility: 'hidden',
+        position: 'absolute',
+        transition: theme.transitions.create(['opacity', 'visibility'], {
+            easing: theme.transitions.easing.easeInOut,
+            duration: theme.transitions.duration.shorter,
+        }),
+    };
 
-  const bgStyles: CSSObject = {
-    ...pauseStyles,
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-    zIndex: pauseZindex.top,
-    backdropFilter: `blur(12px)`,
-    WebkitBackdropFilter: `blur(12px)`,
-    backgroundColor: varAlpha(theme.vars.palette.background.defaultChannel, 0.85),
-    ...(isOffset && {
-      opacity: 1,
-      visibility: 'visible',
-    }),
-  };
+    const bgStyles: CSSObject = {
+        ...pauseStyles,
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        zIndex: pauseZindex.top,
+        backdropFilter: `blur(12px)`,
+        WebkitBackdropFilter: `blur(12px)`,
+        backgroundColor: varAlpha(theme.vars.palette.background.defaultChannel, 0.85),
+        ...(isOffset && {
+            opacity: 1,
+            visibility: 'visible',
+        }),
+    };
 
-  const shadowStyles: CSSObject = {
-    ...pauseStyles,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    height: 24,
-    margin: 'auto',
-    borderRadius: '50%',
-    width: `calc(100% - 48px)`,
-    zIndex: pauseZindex.bottom,
-    boxShadow: theme.vars.customShadows.z8,
-    ...(isOffset && { opacity: 0.48, visibility: 'visible' }),
-  };
+    const shadowStyles: CSSObject = {
+        ...pauseStyles,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        height: 24,
+        margin: 'auto',
+        borderRadius: '50%',
+        width: `calc(100% - 48px)`,
+        zIndex: pauseZindex.bottom,
+        boxShadow: theme.vars.customShadows.z8,
+        ...(isOffset && { opacity: 0.48, visibility: 'visible' }),
+    };
 
-  return {
-    boxShadow: 'none',
-    zIndex: 'var(--layout-header-zIndex)',
-    ...(!disableOffset && { '&::before': bgStyles }),
-    ...(!disableElevation && { '&::after': shadowStyles }),
-  };
+    return {
+        boxShadow: 'none',
+        zIndex: 'var(--layout-header-zIndex)',
+        ...(!disableOffset && { '&::before': bgStyles }),
+        ...(!disableElevation && { '&::after': shadowStyles }),
+    };
 });
 
 const HeaderContainer = styled(Container, {
-  shouldForwardProp: (prop: string) => !['layoutQuery', 'sx'].includes(prop),
+    shouldForwardProp: (prop: string) => !['layoutQuery', 'sx'].includes(prop),
 })<Pick<HeaderSectionProps, 'layoutQuery'>>(({ layoutQuery = 'md', theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  color: 'var(--color)',
-  height: 'var(--layout-header-mobile-height)',
-  [theme.breakpoints.up(layoutQuery)]: { height: 'var(--layout-header-desktop-height)' },
+    display: 'flex',
+    alignItems: 'center',
+    color: 'var(--color)',
+    height: 'var(--layout-header-mobile-height)',
+    [theme.breakpoints.up(layoutQuery)]: { height: 'var(--layout-header-desktop-height)' },
 }));
 
 const HeaderCenterArea = styled('div')(() => ({
-  display: 'flex',
-  flex: '1 1 auto',
-  justifyContent: 'center',
+    display: 'flex',
+    flex: '1 1 auto',
+    justifyContent: 'center',
 }));

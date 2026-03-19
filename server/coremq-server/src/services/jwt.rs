@@ -26,8 +26,8 @@ impl JwtService {
     }
 
     pub fn generate(&self, username: String, role:RoleType) -> Result<Token, Error> {
-        let access_token = self.generate_token(username.clone(), JwtType::AccessToken, 3600, &role)?;
-        let refresh_token = self.generate_token(username.clone(), JwtType::RefreshToken, 6200, &role)?;
+        let access_token = self.generate_token(username.clone(), JwtType::AccessToken, 86400, &role)?;
+        let refresh_token = self.generate_token(username.clone(), JwtType::RefreshToken, 604800, &role)?;
         Ok(Token{
             access_token, refresh_token
         })

@@ -3,3 +3,4 @@ pub mod claims;
 pub mod login;
 pub mod pagination;
 pub mod session_query;
+pub mod topic_info;

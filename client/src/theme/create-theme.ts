@@ -11,28 +11,26 @@ import { customShadows } from './core/custom-shadows';
 
 import type { ThemeOptions } from './types';
 
-
 export const baseTheme: ThemeOptions = {
-  colorSchemes: {
-    light: {
-      palette: palette.light,
-      shadows: shadows.light,
-      customShadows: customShadows.light,
+    colorSchemes: {
+        light: {
+            palette: palette.light,
+            shadows: shadows.light,
+            customShadows: customShadows.light,
+        },
     },
-  },
-  components,
-  typography,
-  shape: { borderRadius: 6 },
-  cssVariables: themeConfig.cssVariables,
+    components,
+    typography,
+    shape: { borderRadius: 6 },
+    cssVariables: themeConfig.cssVariables,
 };
 
-
 type CreateThemeProps = {
-  themeOverrides?: ThemeOptions;
+    themeOverrides?: ThemeOptions;
 };
 
 export function createTheme({ themeOverrides = {} }: CreateThemeProps = {}): Theme {
-  const theme = createMuiTheme(baseTheme, themeOverrides);
+    const theme = createMuiTheme(baseTheme, themeOverrides);
 
-  return theme;
+    return theme;
 }

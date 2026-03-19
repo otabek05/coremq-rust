@@ -1,11 +1,9 @@
 export type SignInRequest = {
-  username: string;
-  password: string;
+    username: string;
+    password: string;
 };
 
-
 export type Token = {
-  access_token: string;
-  refresh_token: string;
-}
-
+    access_token: string;
+    refresh_token: string;
+};

@@ -9,7 +9,8 @@
     "listeners": "Listeners",
     "admin": "Admin",
     "webhook": "Webhook",
-    "websocket": "Websocket"
+    "websocket": "Websocket",
+    "topics": "Topics"
   },
 
   "sessions": {
@@ -78,5 +79,20 @@
     "subscribeConsole": "Subscribe Console",
     "subscribed": "Subscribed to",
     "unsubscribed": "Unsubscribed from"
+  },
+
+  "topics": {
+    "title": "Topics",
+    "topic": "Topic",
+    "subscribers": "Subscribers",
+    "actions": "Actions",
+    "empty": "No active topics",
+    "refresh": "Refresh",
+    "publish": "Publish",
+    "publishMessage": "Publish Message",
+    "payload": "Payload",
+    "retain": "Retain",
+    "cancel": "Cancel",
+    "publishing": "Publishing..."
   }
 }

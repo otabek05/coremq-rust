@@ -49,7 +49,8 @@
     "react-dom": "^19.1.0",
     "react-i18next": "^16.5.8",
     "react-router-dom": "^7.4.1",
-    "simplebar-react": "^3.3.0"
+    "simplebar-react": "^3.3.0",
+    "zustand": "^5.0.12"
   },
   "devDependencies": {
     "@types/js-cookie": "^3.0.6",

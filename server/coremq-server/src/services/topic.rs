@@ -1,6 +1,8 @@
 use dashmap::{DashMap, DashSet};
 use std::sync::Arc;
 
+use crate::models::topic_info::TopicInfo;
+
 #[derive(Debug, Default)]
 pub struct TopicNode {
     children: DashMap<String, Arc<TopicNode>>,
@@ -24,7 +26,9 @@ impl TopicService {
 
         for level in topic.split('/') {
             current = {
-                // Access the children map and ensure it is inserted if not already present
+                /*
+                  Ensure the child node exists for this topic level.
+                */
                 let node = current.children.entry(level.to_string())
                     .or_insert_with(|| Arc::new(TopicNode::default()))
                     .clone();
@@ -33,7 +37,9 @@ impl TopicService {
             };
         }
 
-        // Add the client to the subscribers list for the current topic
+        /*
+          Add the client as a subscriber for this topic node.
+        */
         current.subscribers.insert(client_id.to_string());
     }
 
@@ -84,6 +90,41 @@ impl TopicService {
 
         if let Some(child) = node.children.get("#") {
             result.extend(child.subscribers.iter().map(|r| r.clone()));
+        }
+    }
+
+    /*
+      Collect active topics with subscriber counts.
+    */
+    pub fn collect_topics(&self) -> Vec<TopicInfo> {
+        let mut result = Vec::new();
+        self.collect_recursive(&self.root, String::new(), &mut result);
+        result
+    }
+
+    /*
+      Walk the topic tree and accumulate active topics.
+    */
+    fn collect_recursive(&self, node: &Arc<TopicNode>, path: String, result: &mut Vec<TopicInfo>) {
+        let count = node.subscribers.len();
+        if count > 0 {
+            result.push(TopicInfo {
+                topic: path.clone(),
+                subscriber_count: count,
+            });
+        }
+
+        for entry in node.children.iter() {
+            let child_key = entry.key().clone();
+            let child_node = entry.value().clone();
+
+            let child_path = if path.is_empty() {
+                child_key
+            } else {
+                format!("{}/{}", path, child_key)
+            };
+
+            self.collect_recursive(&child_node, child_path, result);
         }
     }
 

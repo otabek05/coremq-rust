@@ -9,7 +9,8 @@
     "listeners": "리스너",
     "admin": "관리자",
     "webhook": "웹훅",
-    "websocket": "Websocket"
+    "websocket": "Websocket",
+    "topics": "주제"
   },
 
   "sessions": {
@@ -78,5 +79,20 @@
     "subscribeConsole": "구독 콘솔",
     "subscribed": "구독됨",
     "unsubscribed": "구독 해제됨"
+  },
+
+  "topics": {
+    "title": "주제",
+    "topic": "주제",
+    "subscribers": "구독자",
+    "actions": "작업",
+    "empty": "활성 주제가 없습니다",
+    "refresh": "새로고침",
+    "publish": "퍼블리시",
+    "publishMessage": "메시지 퍼블리시",
+    "payload": "페이로드",
+    "retain": "유지",
+    "cancel": "취소",
+    "publishing": "퍼블리시 중..."
   }
 }
