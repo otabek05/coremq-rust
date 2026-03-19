@@ -121,6 +121,22 @@ impl Engine {
                             }
                             let _ = reply_tx.send(existed);
                         }
+
+                        /*
+                          Collect active topics and reply with results.
+                        */
+                        AdminCommand::GetTopics(reply_tx) => {
+                            let topics = self.topic_service.collect_topics();
+                            let _ = reply_tx.send(topics);
+                        }
+
+                        /*
+                          Publish a message and acknowledge completion.
+                        */
+                        AdminCommand::PublishMessage(packet, reply_tx) => {
+                            self.publish(packet);
+                            let _ = reply_tx.send(true);
+                        }
                     }
                 }
             }

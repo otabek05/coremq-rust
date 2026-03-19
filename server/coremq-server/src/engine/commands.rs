@@ -3,8 +3,8 @@ use std::net::SocketAddr;
 use tokio::sync::{mpsc, oneshot};
 
 use crate::{
-    enums::MqttChannel, 
-    models::{ listener::ListenerConfig, pagination::Page, session::Session}, 
+    enums::MqttChannel,
+    models::{ listener::ListenerConfig, pagination::Page, session::Session, topic_info::TopicInfo},
     protocol::packets::{ConnectPacket, PublishPacket, SubscribePacket, UnsubscribePacket}
 };
 
@@ -30,4 +30,15 @@ pub enum AdminCommand {
     GetListeners(oneshot::Sender<Vec<ListenerConfig>>),
     StopListener(u16),
     DisconnectClient(String, oneshot::Sender<bool>),
+
+    /*
+      Returns active topics and subscriber counts.
+      Reply is sent through the provided oneshot sender.
+    */
+    GetTopics(oneshot::Sender<Vec<TopicInfo>>),
+
+    /*
+      Publishes a message and replies with success status.
+    */
+    PublishMessage(PublishPacket, oneshot::Sender<bool>),
 }
