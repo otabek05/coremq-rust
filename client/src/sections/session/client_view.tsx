@@ -29,52 +29,34 @@ import Snackbar from "@mui/material/Snackbar";
 
 import { Iconify } from "src/components/iconify";
 import type { Session } from "src/types/sessions";
-import { fetchSessions, deleteSession } from "src/services/sessions";
+import { useSessionStore } from "src/stores/session-store";
 
 export function SessionView() {
-  const [sessions, setSessions] = useState<Session[]>([]);
-  const [page, setPage] = useState(0);
-  const [size, setSize] = useState(10);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalElements, setTotalElements] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    sessions, page, size, totalPages, totalElements,
+    loading, error,
+    fetch: fetchSessions, disconnect, setSize: storeSetSize, clearError,
+  } = useSessionStore();
+
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Session | null>(null);
   const [disconnecting, setDisconnecting] = useState<string | null>(null);
   const [snackbar, setSnackbar] = useState<string | null>(null);
   const { t } = useTranslation();
 
-  const loadSessions = async (pageNumber = 0, searchValue = search, pageSize = size) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await fetchSessions(pageNumber, pageSize, searchValue);
-      setSessions(data?.data?.content ?? []);
-      setPage(data?.data?.page ?? 0);
-      setTotalPages(data?.data?.total_pages ?? 1);
-      setTotalElements(data?.data?.total_elements ?? 0);
-    } catch (err: any) {
-      setError(err?.message || "Failed to load sessions");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    loadSessions();
+    fetchSessions(0, size, "");
   }, []);
 
   const handleDisconnect = async (clientId: string) => {
     if (!window.confirm(`Disconnect client "${clientId}"?`)) return;
     setDisconnecting(clientId);
     try {
-      await deleteSession(clientId);
+      await disconnect(clientId);
       setSnackbar(`Client "${clientId}" disconnected`);
       if (selected?.client_id === clientId) setSelected(null);
-      loadSessions(page);
-    } catch (err: any) {
-      setError(err?.message || "Failed to disconnect client");
+    } catch {
+      /** error handled by store */
     } finally {
       setDisconnecting(null);
     }
@@ -110,7 +92,7 @@ export function SessionView() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter") loadSessions(0, search);
+              if (e.key === "Enter") fetchSessions(0, size, search);
             }}
             slotProps={{
               input: {
@@ -131,7 +113,7 @@ export function SessionView() {
             variant="contained"
             color="inherit"
             startIcon={<Iconify icon="mdi:refresh" width={18} />}
-            onClick={() => loadSessions(page)}
+            onClick={() => fetchSessions(page, size, search)}
             size="small"
             sx={{ height: 36 }}
           >
@@ -141,7 +123,7 @@ export function SessionView() {
       </Box>
 
       {error && (
-        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
+        <Alert severity="error" sx={{ mb: 2 }} onClose={clearError}>
           {error}
         </Alert>
       )}
@@ -253,7 +235,7 @@ export function SessionView() {
           <Pagination
             count={totalPages}
             page={page + 1}
-            onChange={(_, value) => loadSessions(value - 1)}
+            onChange={(_, value) => fetchSessions(value - 1, size, search)}
             color="primary"
             size="small"
           />
@@ -262,8 +244,8 @@ export function SessionView() {
               value={size}
               onChange={(e) => {
                 const newSize = Number(e.target.value);
-                setSize(newSize);
-                loadSessions(0, search, newSize);
+                storeSetSize(newSize);
+                fetchSessions(0, newSize, search);
               }}
               sx={{ fontSize: '0.8rem' }}
             >

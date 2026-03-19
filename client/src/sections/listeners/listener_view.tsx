@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import Box from "@mui/material/Box";
@@ -18,40 +18,19 @@ import Card from "@mui/material/Card";
 import Tooltip from "@mui/material/Tooltip";
 
 import { Iconify } from "src/components/iconify";
-import type { Listener } from "src/types/listeners";
-import { fetchListeners, stopListener } from "src/services/listeners";
+import { useListenerStore } from "src/stores/listener-store";
 
 export function ListenerView() {
-  const [listeners, setListeners] = useState<Listener[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { listeners, loading, error, fetch: fetchListeners, stop, clearError } = useListenerStore();
   const { t } = useTranslation();
 
-  const loadListeners = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await fetchListeners();
-      setListeners(data ?? []);
-    } catch (err: any) {
-      setError(err?.message || "Failed to load listeners");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    loadListeners();
+    fetchListeners();
   }, []);
 
   const handleStop = async (port: number, name: string) => {
     if (!window.confirm(`Stop listener "${name}" on port ${port}?`)) return;
-    try {
-      await stopListener(port);
-      loadListeners();
-    } catch (err: any) {
-      setError(err?.message || "Failed to stop listener");
-    }
+    await stop(port);
   };
 
   const protocolColor = (protocol: string) => {
@@ -64,7 +43,7 @@ export function ListenerView() {
     }
   };
 
-  if (loading) {
+  if (loading && listeners.length === 0) {
     return (
       <Box sx={{ m: 3, display: "flex", justifyContent: "center", py: 10 }}>
         <CircularProgress size={32} sx={{ color: 'primary.main' }} />
@@ -87,7 +66,7 @@ export function ListenerView() {
           variant="contained"
           color="inherit"
           startIcon={<Iconify icon="mdi:refresh" width={18} />}
-          onClick={loadListeners}
+          onClick={fetchListeners}
           size="small"
         >
           {t("sessions.refresh")}
@@ -95,7 +74,7 @@ export function ListenerView() {
       </Box>
 
       {error && (
-        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
+        <Alert severity="error" sx={{ mb: 2 }} onClose={clearError}>
           {error}
         </Alert>
       )}
@@ -160,9 +139,7 @@ export function ListenerView() {
                           size="small"
                           color="error"
                           onClick={() => handleStop(listener.port, listener.name)}
-                          sx={{
-                            '&:hover': { bgcolor: 'rgba(255, 86, 48, 0.1)' },
-                          }}
+                          sx={{ '&:hover': { bgcolor: 'rgba(255, 86, 48, 0.1)' } }}
                         >
                           <Iconify icon="mdi:stop-circle-outline" width={18} />
                         </IconButton>

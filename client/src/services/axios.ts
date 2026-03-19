@@ -4,7 +4,7 @@ import Cookies from "js-cookie";
 const BASE_URL = import.meta.env.VITE_API_URL;
 
 export const api = axios.create({
-    baseURL: `http://${window.location.hostname}:18083` //BASE_URL,
+    baseURL: `http://${window.location.hostname}:18083`,
 });
 
 let isRefreshing = false;

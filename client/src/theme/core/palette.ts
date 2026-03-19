@@ -12,33 +12,33 @@ import type { ThemeColorScheme } from '../types';
  * @to {@link file://./../extend-theme-types.d.ts}
  */
 
-// Keys for the palette colors
+/** Keys for the palette colors */
 export type PaletteColorKey = 'primary' | 'secondary' | 'info' | 'success' | 'warning' | 'error';
 
-// Palette color without additional channels
+/** Palette color without additional channels */
 export type PaletteColorNoChannels = Omit<PaletteColor, 'lighterChannel' | 'darkerChannel'>;
 
-// Palette color with additional channels
+/** Palette color with additional channels */
 export type PaletteColorWithChannels = PaletteColor & PaletteColorChannel;
 
-// Extended common colors
+/** Extended common colors */
 export type CommonColorsExtend = {
   whiteChannel: string;
   blackChannel: string;
 };
 
-// Extended text colors
+/** Extended text colors */
 export type TypeTextExtend = {
   disabledChannel: string;
 };
 
-// Extended background colors
+/** Extended background colors */
 export type TypeBackgroundExtend = {
   neutral: string;
   neutralChannel: string;
 };
 
-// Extended palette colors
+/** Extended palette colors */
 export type PaletteColorExtend = {
   lighter: string;
   darker: string;
@@ -46,7 +46,7 @@ export type PaletteColorExtend = {
   darkerChannel: string;
 };
 
-// Extended grey channels
+/** Extended grey channels */
 export type GreyExtend = {
   '50Channel': string;
   '100Channel': string;
@@ -61,31 +61,31 @@ export type GreyExtend = {
 };
 
 
-// Primary color
+/** Primary color */
 export const primary = createPaletteChannel(themeConfig.palette.primary);
 
-// Secondary color
+/** Secondary color */
 export const secondary = createPaletteChannel(themeConfig.palette.secondary);
 
-// Info color
+/** Info color */
 export const info = createPaletteChannel(themeConfig.palette.info);
 
-// Success color
+/** Success color */
 export const success = createPaletteChannel(themeConfig.palette.success);
 
-// Warning color
+/** Warning color */
 export const warning = createPaletteChannel(themeConfig.palette.warning);
 
-// Error color
+/** Error color */
 export const error = createPaletteChannel(themeConfig.palette.error);
 
-// Common color
+/** Common color */
 export const common = createPaletteChannel(themeConfig.palette.common);
 
-// Grey color
+/** Grey color */
 export const grey = createPaletteChannel(themeConfig.palette.grey);
 
-// Text color
+/** Text color */
 export const text = {
   light: createPaletteChannel({
     primary: '#E2E8F0',
@@ -94,7 +94,7 @@ export const text = {
   }),
 };
 
-// Background color
+/** Background color */
 export const background = {
   light: createPaletteChannel({
     paper: '#131825',
@@ -103,7 +103,7 @@ export const background = {
   }),
 };
 
-// Base action color
+/** Base action color */
 export const baseAction = {
   hover: varAlpha(grey['400Channel'], 0.08),
   selected: varAlpha(grey['400Channel'], 0.16),
@@ -114,13 +114,13 @@ export const baseAction = {
   disabledOpacity: 0.48,
 };
 
-// Action color
+/** Action color */
 export const action = {
   light: { ...baseAction, active: grey[400] },
 };
 
 
-// Base palette
+/** Base palette */
 export const basePalette = {
   primary,
   secondary,

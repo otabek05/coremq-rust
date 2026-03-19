@@ -62,10 +62,10 @@ export function DashboardLayout({
   const theme = useTheme();
   const navData = useNavData();
 
-  // Mobile drawer
+  /** Mobile drawer */
   const { value: mobileOpen, onFalse: onMobileClose, onTrue: onMobileOpen } = useBoolean();
 
-  // Desktop collapse
+  /** Desktop collapse */
   const [collapsed, setCollapsed] = useState(false);
   const toggleCollapsed = () => setCollapsed((prev) => !prev);
 

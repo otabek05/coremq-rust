@@ -13,7 +13,8 @@ i18n
       ko: { translation: ko },
       uz: { translation: uz },
     },
-    lng: 'en', // default language
+    /** Default language */
+    lng: 'en',
     fallbackLng: 'en',
     interpolation: { escapeValue: false },
   });

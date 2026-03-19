@@ -1,5 +1,4 @@
-
-export interface Session {
+export type Session = {
   client_id: string;
   username: string;
   clean_session: boolean;
@@ -7,4 +6,4 @@ export interface Session {
   connected_port: number;
   connected_at: string;
   subscriptions: Record<string, any>;
-}
+};

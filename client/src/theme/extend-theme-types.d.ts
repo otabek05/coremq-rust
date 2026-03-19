@@ -23,15 +23,15 @@ import type {
  * @from {@link file://./core/palette.ts}
  */
 declare module '@mui/material/styles' {
-  // grey
+  /** Grey */
   interface Color extends GreyExtend {}
-  // text
+  /** Text */
   interface TypeText extends TypeTextExtend {}
-  // black & white
+  /** Black & white */
   interface CommonColors extends CommonColorsExtend {}
-  // background
+  /** Background */
   interface TypeBackground extends TypeBackgroundExtend {}
-  // primary, secondary, info, success, warning, error
+  /** Primary, secondary, info, success, warning, error */
   interface PaletteColor extends PaletteColorExtend {}
   interface SimplePaletteColorOptions extends Partial<PaletteColorExtend> {}
 }

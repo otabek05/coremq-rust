@@ -10,7 +10,7 @@ import type { ThemeColorScheme } from '../types';
  * @to {@link file://./../extend-theme-types.d.ts}
  */
 
-export interface CustomShadows {
+export type CustomShadows = {
   z1?: string;
   z4?: string;
   z8?: string;

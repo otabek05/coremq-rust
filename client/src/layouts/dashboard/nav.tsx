@@ -23,7 +23,7 @@ import {
 } from './nav-config';
 import type { NavContentProps } from './nav-config';
 
-// Desktop sidebar
+/** Desktop sidebar */
 export function NavDesktop({
   sx,
   data,
@@ -91,7 +91,7 @@ export function NavDesktop({
   );
 }
 
-// Mobile drawer
+/** Mobile drawer */
 export function NavMobile({
   sx,
   data,
@@ -127,7 +127,7 @@ export function NavMobile({
   );
 }
 
-// Main content
+/** Main content */
 function NavContent({ data, slots, sx, collapsed }: Omit<NavContentProps, 'onToggle'>) {
   const pathname = usePathname();
 

@@ -26,38 +26,22 @@ import InputLabel from "@mui/material/InputLabel";
 import Card from "@mui/material/Card";
 
 import { Iconify } from "src/components/iconify";
-import type { User } from "src/types/users";
-import { fetchUsers, createUser } from "src/services/users";
+import { useUserStore } from "src/stores/user-store";
 
 export function AdminView() {
-  const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { users, loading, error, fetch: fetchUsers, create, clearError } = useUserStore();
+
   const [dialogOpen, setDialogOpen] = useState(false);
   const [creating, setCreating] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
-
   const [newUsername, setNewUsername] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [newRole, setNewRole] = useState("user");
 
   const { t } = useTranslation();
 
-  const loadUsers = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetchUsers();
-      setUsers(res?.data ?? []);
-    } catch (err: any) {
-      setError(err?.message || "Failed to load users");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    loadUsers();
+    fetchUsers();
   }, []);
 
   const handleCreate = async () => {
@@ -68,21 +52,20 @@ export function AdminView() {
 
     setCreating(true);
     setFormError(null);
-    try {
-      await createUser({
-        username: newUsername,
-        password_hash: newPassword,
-        role: newRole,
-      });
+    const success = await create({
+      username: newUsername,
+      password_hash: newPassword,
+      role: newRole,
+    });
+    setCreating(false);
+
+    if (success) {
       setDialogOpen(false);
       setNewUsername("");
       setNewPassword("");
       setNewRole("user");
-      loadUsers();
-    } catch (err: any) {
-      setFormError(err?.response?.data?.message || err?.message || "Failed to create user");
-    } finally {
-      setCreating(false);
+    } else {
+      setFormError("Failed to create user");
     }
   };
 
@@ -94,7 +77,7 @@ export function AdminView() {
     }
   };
 
-  if (loading) {
+  if (loading && users.length === 0) {
     return (
       <Box sx={{ m: 3, display: "flex", justifyContent: "center", py: 10 }}>
         <CircularProgress size={32} sx={{ color: 'primary.main' }} />
@@ -126,7 +109,7 @@ export function AdminView() {
             variant="contained"
             color="inherit"
             startIcon={<Iconify icon="mdi:refresh" width={18} />}
-            onClick={loadUsers}
+            onClick={fetchUsers}
             size="small"
           >
             {t("sessions.refresh")}
@@ -135,7 +118,7 @@ export function AdminView() {
       </Box>
 
       {error && (
-        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
+        <Alert severity="error" sx={{ mb: 2 }} onClose={clearError}>
           {error}
         </Alert>
       )}

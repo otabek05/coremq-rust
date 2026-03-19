@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import Box from "@mui/material/Box";
@@ -7,67 +7,36 @@ import Grid from "@mui/material/Grid";
 import Alert from "@mui/material/Alert";
 
 import { DashboardContent } from "src/layouts/dashboard";
-import { fetchSessions } from "src/services/sessions";
-import { fetchTopics } from "src/services/topics";
-import { fetchListeners } from "src/services/listeners";
-import type { Session } from "src/types/sessions";
-import type { TopicInfo } from "src/types/topics";
+import { useSessionStore } from "src/stores/session-store";
+import { useTopicStore } from "src/stores/topic-store";
+import { useListenerStore } from "src/stores/listener-store";
 
 import StatCard from "./stat_card";
 import RecentClients from "./recent_clients";
 import TopicsOverview from "./topics_overview";
 
-type Stats = {
-  clients: number | null;
-  topics: number | null;
-  subscriptions: number | null;
-  listeners: number | null;
-};
-
 export default function HomeView() {
   const { t } = useTranslation();
-  const [stats, setStats] = useState<Stats>({
-    clients: null,
-    topics: null,
-    subscriptions: null,
-    listeners: null,
-  });
-  const [recentSessions, setRecentSessions] = useState<Session[] | null>(null);
-  const [topicList, setTopicList] = useState<TopicInfo[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
+
+  const sessionStore = useSessionStore();
+  const topicStore = useTopicStore();
+  const listenerStore = useListenerStore();
 
   useEffect(() => {
-    loadDashboard();
+    sessionStore.fetch(0, 5);
+    topicStore.fetch();
+    listenerStore.fetch();
   }, []);
 
-  const loadDashboard = async () => {
-    try {
-      const [sessionsRes, topicsRes, listenersRes] = await Promise.all([
-        fetchSessions(0, 5),
-        fetchTopics(),
-        fetchListeners(),
-      ]);
-
-      const topics = topicsRes?.data ?? [];
-      const totalSubs = topics.reduce((sum, tp) => sum + tp.subscriber_count, 0);
-      const sessions = sessionsRes?.data?.content ?? [];
-
-      setStats({
-        clients: sessionsRes?.data?.total_elements ?? 0,
-        topics: topics.length,
-        subscriptions: totalSubs,
-        listeners: Array.isArray(listenersRes) ? listenersRes.length : 0,
-      });
-      setRecentSessions(sessions);
-      setTopicList(topics);
-    } catch (err: any) {
-      setError(err?.message || "Failed to load dashboard");
-    }
+  const error = sessionStore.error || topicStore.error || listenerStore.error;
+  const clearAllErrors = () => {
+    sessionStore.clearError();
+    topicStore.clearError();
+    listenerStore.clearError();
   };
 
   return (
     <DashboardContent maxWidth="xl">
-      {/* Header */}
       <Box sx={{ py: 2, mb: 1 }}>
         <Typography
           variant="h4"
@@ -81,17 +50,16 @@ export default function HomeView() {
       </Box>
 
       {error && (
-        <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError(null)}>
+        <Alert severity="error" sx={{ mb: 3 }} onClose={clearAllErrors}>
           {error}
         </Alert>
       )}
 
-      {/* Stat Cards Row */}
       <Grid container spacing={2.5} sx={{ mb: 3 }}>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <StatCard
             label="Connected Clients"
-            value={stats.clients}
+            value={sessionStore.loading ? null : sessionStore.totalElements}
             icon="lucide:users"
             color="#00A76F"
             trend="up"
@@ -103,7 +71,7 @@ export default function HomeView() {
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <StatCard
             label="Active Topics"
-            value={stats.topics}
+            value={topicStore.loading ? null : topicStore.topics.length}
             icon="lucide:hash"
             color="#00B8D9"
             trend="neutral"
@@ -115,7 +83,7 @@ export default function HomeView() {
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <StatCard
             label="Total Subscriptions"
-            value={stats.subscriptions}
+            value={topicStore.loading ? null : topicStore.totalSubscriptions}
             icon="lucide:bell-ring"
             color="#FFAB00"
             trend="up"
@@ -127,7 +95,7 @@ export default function HomeView() {
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <StatCard
             label="Active Listeners"
-            value={stats.listeners}
+            value={listenerStore.loading ? null : listenerStore.listeners.length}
             icon="lucide:radio-tower"
             color="#FF5630"
             trend="neutral"
@@ -138,13 +106,16 @@ export default function HomeView() {
         </Grid>
       </Grid>
 
-      {/* Bottom Section: Recent Clients + Topics */}
       <Grid container spacing={2.5}>
         <Grid size={{ xs: 12, md: 7 }}>
-          <RecentClients sessions={recentSessions} />
+          <RecentClients
+            sessions={sessionStore.loading ? null : sessionStore.sessions}
+          />
         </Grid>
         <Grid size={{ xs: 12, md: 5 }}>
-          <TopicsOverview topics={topicList} />
+          <TopicsOverview
+            topics={topicStore.loading ? null : topicStore.topics}
+          />
         </Grid>
       </Grid>
     </DashboardContent>

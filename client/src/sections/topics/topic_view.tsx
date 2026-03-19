@@ -9,35 +9,19 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Alert from "@mui/material/Alert";
 
 import { Iconify } from "src/components/iconify";
-import type { TopicInfo } from "src/types/topics";
-import { fetchTopics } from "src/services/topics";
+import { useTopicStore } from "src/stores/topic-store";
 
 import TopicTable from "./topic_table";
 import PublishDrawer from "./publish_drawer";
 
 export default function TopicView() {
-  const [topics, setTopics] = useState<TopicInfo[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { topics, loading, error, fetch: fetchTopics, clearError } = useTopicStore();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerTopic, setDrawerTopic] = useState("");
   const { t } = useTranslation();
 
-  const loadTopics = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await fetchTopics();
-      setTopics(data?.data ?? []);
-    } catch (err: any) {
-      setError(err?.message || "Failed to load topics");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    loadTopics();
+    fetchTopics();
   }, []);
 
   const openPublish = (topic = "") => {
@@ -94,7 +78,7 @@ export default function TopicView() {
             variant="contained"
             color="inherit"
             startIcon={<Iconify icon="mdi:refresh" width={18} />}
-            onClick={() => loadTopics()}
+            onClick={() => fetchTopics()}
             size="small"
             sx={{ height: 36 }}
           >
@@ -104,7 +88,7 @@ export default function TopicView() {
       </Box>
 
       {error && (
-        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
+        <Alert severity="error" sx={{ mb: 2 }} onClose={clearError}>
           {error}
         </Alert>
       )}
