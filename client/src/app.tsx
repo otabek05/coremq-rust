@@ -6,28 +6,22 @@ import { usePathname } from 'src/routes/hooks';
 
 import { ThemeProvider } from 'src/theme/theme-provider';
 
-
 type AppProps = {
-  children: React.ReactNode;
+    children: React.ReactNode;
 };
 
 export default function App({ children }: AppProps) {
-  useScrollToTop();
+    useScrollToTop();
 
-  return (
-    <ThemeProvider>
-      {children}
-    </ThemeProvider>
-  );
+    return <ThemeProvider>{children}</ThemeProvider>;
 }
 
-
 function useScrollToTop() {
-  const pathname = usePathname();
+    const pathname = usePathname();
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [pathname]);
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [pathname]);
 
-  return null;
+    return null;
 }

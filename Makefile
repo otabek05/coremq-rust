@@ -1,5 +1,5 @@
 SHELL := /bin/zsh
-.PHONY: dev server client install setup
+.PHONY: dev server client install setup fmt lint fix
 
 # Run both backend and frontend concurrently
 dev:
@@ -26,3 +26,15 @@ setup:
 	source $$HOME/.cargo/env 2>/dev/null; cargo build -p coremq-server
 	cd client && yarn install
 	@echo "Setup complete. Run 'make dev' to start."
+
+# Format all frontend files with prettier
+fmt:
+	cd client && npx prettier --write "src/**/*.{ts,tsx}"
+
+# Lint all frontend files
+lint:
+	cd client && npx eslint "src/**/*.{js,jsx,ts,tsx}"
+
+# Format + lint fix
+fix:
+	cd client && npm run fix:all

@@ -11,87 +11,83 @@ import { AuthLayout } from 'src/layouts/auth';
 import { DashboardLayout } from 'src/layouts/dashboard';
 import ProtectedRoute from './protected_route';
 
-
 export const DashboardPage = lazy(() => import('src/pages/home'));
 export const AdminPage = lazy(() => import('src/pages/admin'));
 export const SessionPage = lazy(() => import('src/pages/session'));
 export const SignInPage = lazy(() => import('src/pages/sign-in'));
 export const ListenerPage = lazy(() => import('src/pages/listener'));
 export const WebhookPage = lazy(() => import('src/pages/webhook'));
-export const WebsocketPage = lazy(()=> import('src/pages/websocket'));
+export const WebsocketPage = lazy(() => import('src/pages/websocket'));
 export const TopicsPage = lazy(() => import('src/pages/topics'));
 export const Page404 = lazy(() => import('src/pages/page-not-found'));
 
-
-
 const renderFallback = () => (
-  <Box
-    sx={{
-      display: 'flex',
-      flex: '1 1 auto',
-      alignItems: 'center',
-      justifyContent: 'center',
-    }}
-  >
-    <LinearProgress
-      sx={{
-        width: 1,
-        maxWidth: 320,
-        bgcolor: (theme) => varAlpha(theme.vars.palette.text.primaryChannel, 0.16),
-        [`& .${linearProgressClasses.bar}`]: { bgcolor: 'text.primary' },
-      }}
-    />
-  </Box>
+    <Box
+        sx={{
+            display: 'flex',
+            flex: '1 1 auto',
+            alignItems: 'center',
+            justifyContent: 'center',
+        }}
+    >
+        <LinearProgress
+            sx={{
+                width: 1,
+                maxWidth: 320,
+                bgcolor: (theme) => varAlpha(theme.vars.palette.text.primaryChannel, 0.16),
+                [`& .${linearProgressClasses.bar}`]: { bgcolor: 'text.primary' },
+            }}
+        />
+    </Box>
 );
 
-
 export const routesSection: RouteObject[] = [
-  {
-    element: <ProtectedRoute />,
-    children: [
-      {
-        element: (
-          <DashboardLayout>
-            <Suspense fallback={renderFallback()}>
-              <Outlet />
-            </Suspense>
-          </DashboardLayout>
-        ),
+    {
+        element: <ProtectedRoute />,
         children: [
-          { index: true, element: <DashboardPage /> },
-          { path: 'sessions', element: <SessionPage /> },
-          { path: 'listeners', element: <ListenerPage /> },
-          { path: 'admins', element: <AdminPage /> },
-          { path: 'webhooks', element: <WebhookPage /> },
-          {path: 'websockets', element: <WebsocketPage /> },
-          { path: 'topics', element: <TopicsPage /> }
+            {
+                element: (
+                    <DashboardLayout>
+                        <Suspense fallback={renderFallback()}>
+                            <Outlet />
+                        </Suspense>
+                    </DashboardLayout>
+                ),
+                children: [
+                    { index: true, element: <DashboardPage /> },
+                    { path: 'sessions', element: <SessionPage /> },
+                    { path: 'listeners', element: <ListenerPage /> },
+                    { path: 'admins', element: <AdminPage /> },
+                    { path: 'webhooks', element: <WebhookPage /> },
+                    { path: 'websockets', element: <WebsocketPage /> },
+                    { path: 'topics', element: <TopicsPage /> },
+                ],
+            },
         ],
-      },
-    ],
-  },
+    },
 
-  {
-    path: 'sign-in',
-    element: (
-      <AuthLayout>
-        <Suspense fallback={renderFallback()}>
-          <SignInPage />
-        </Suspense>
-      </AuthLayout>
-    ),
-  },
+    {
+        path: 'sign-in',
+        element: (
+            <AuthLayout>
+                <Suspense fallback={renderFallback()}>
+                    <SignInPage />
+                </Suspense>
+            </AuthLayout>
+        ),
+    },
 
-  {
-    path: '404',
-    element: (
-      <Suspense fallback={renderFallback()}>
-        <Page404 />
-      </Suspense>
-    ),
-  },
+    {
+        path: '404',
+        element: (
+            <Suspense fallback={renderFallback()}>
+                <Page404 />
+            </Suspense>
+        ),
+    },
 
-  {
-    path: '*',
-    element: <Page404 />,
-  },
+    {
+        path: '*',
+        element: <Page404 />,
+    },
 ];

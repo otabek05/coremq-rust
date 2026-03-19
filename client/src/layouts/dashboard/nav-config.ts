@@ -8,12 +8,12 @@ export const NAV_BG = '#0E1320';
 export const NAV_BORDER = '1px solid rgba(148,163,184,0.08)';
 
 export type NavContentProps = {
-  data: NavGroup[];
-  collapsed?: boolean;
-  onToggle?: () => void;
-  slots?: {
-    topArea?: React.ReactNode;
-    bottomArea?: React.ReactNode;
-  };
-  sx?: SxProps<Theme>;
+    data: NavGroup[];
+    collapsed?: boolean;
+    onToggle?: () => void;
+    slots?: {
+        topArea?: React.ReactNode;
+        bottomArea?: React.ReactNode;
+    };
+    sx?: SxProps<Theme>;
 };

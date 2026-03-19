@@ -1,13 +1,13 @@
 export type TlsConfig = {
-  cert: string;
-  key: string;
-  ca?: string;
+    cert: string;
+    key: string;
+    ca?: string;
 };
 
 export type Listener = {
-  name: string;
-  protocol: string;
-  host: string;
-  port: number;
-  tls?: TlsConfig;
+    name: string;
+    protocol: string;
+    host: string;
+    port: number;
+    tls?: TlsConfig;
 };

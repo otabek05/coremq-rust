@@ -1,9 +1,8 @@
 import { useMemo } from 'react';
 import { useLocation } from 'react-router';
 
-
 export function usePathname() {
-  const { pathname } = useLocation();
+    const { pathname } = useLocation();
 
-  return useMemo(() => pathname, [pathname]);
+    return useMemo(() => pathname, [pathname]);
 }
