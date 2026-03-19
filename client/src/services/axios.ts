@@ -1,108 +1,130 @@
-import axios from "axios";
-import Cookies from "js-cookie";
+import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
+import Cookies from 'js-cookie';
 
-const BASE_URL = import.meta.env.VITE_API_URL;
+/** Cookie key constants */
+const TOKEN_KEYS = {
+    ACCESS: 'access_token',
+    REFRESH: 'refresh_token',
+} as const;
 
-export const api = axios.create({
-    baseURL: `http://${window.location.hostname}:18083`,
-});
+/** Cookie options */
+const COOKIE_OPTIONS = { path: '/' } as const;
+
+/** API base URL derived from current hostname */
+const API_BASE = `http://${window.location.hostname}:18083`;
+
+/** Axios instance for all API calls */
+export const api = axios.create({ baseURL: API_BASE });
+
+/** Queue for requests that arrived while a token refresh is in progress */
+type QueueItem = {
+    resolve: (token: string) => void;
+    reject: (error: unknown) => void;
+};
 
 let isRefreshing = false;
-let failedQueue: {
-    resolve: (token: string) => void;
-    reject: (error: any) => void;
-}[] = [];
+let failedQueue: QueueItem[] = [];
 
-function processQueue(error: any, token: string | null = null) {
-    failedQueue.forEach((prom) => {
+/** Resolve or reject all queued requests once refresh completes */
+function processQueue(error: unknown, token: string | null = null) {
+    failedQueue.forEach((item) => {
         if (error) {
-            prom.reject(error);
+            item.reject(error);
         } else if (token) {
-            prom.resolve(token);
+            item.resolve(token);
         }
     });
-
     failedQueue = [];
 }
 
+/** Read a token from cookies */
+function getToken(key: string): string | undefined {
+    return Cookies.get(key);
+}
+
+/** Persist a token to cookies with expiry */
+function setToken(key: string, value: string, expiresDays: number) {
+    Cookies.set(key, value, { ...COOKIE_OPTIONS, expires: expiresDays });
+}
+
+/** Clear all auth tokens and force reload to sign-in */
 function logout() {
-    Cookies.remove("access_token");
-    Cookies.remove("refresh_token");
+    Cookies.remove(TOKEN_KEYS.ACCESS, COOKIE_OPTIONS);
+    Cookies.remove(TOKEN_KEYS.REFRESH, COOKIE_OPTIONS);
     window.location.reload();
 }
 
-api.interceptors.request.use(
-    (config) => {
-        const token = Cookies.get("access_token");
+/** Attempt to refresh the access token using the refresh token */
+async function refreshAccessToken(): Promise<string> {
+    const refreshToken = getToken(TOKEN_KEYS.REFRESH);
 
-        if (token && config.headers) {
-            config.headers.set("Authorization", `Bearer ${token}`);
-        }
+    if (!refreshToken) {
+        throw new Error('No refresh token available');
+    }
 
-        return config;
-    },
-    (error) => Promise.reject(error)
-);
+    const { data } = await axios.post(
+        `${API_BASE}/api/v1/auth/refresh-token`,
+        { refresh_token: refreshToken },
+        { headers: { Authorization: `Bearer ${refreshToken}` } },
+    );
 
+    const newAccessToken: string = data?.data?.access_token;
+    const newRefreshToken: string = data?.data?.refresh_token;
+
+    setToken(TOKEN_KEYS.ACCESS, newAccessToken, 1);
+    setToken(TOKEN_KEYS.REFRESH, newRefreshToken, 7);
+
+    return newAccessToken;
+}
+
+/** Attach bearer token to every outgoing request */
+api.interceptors.request.use((config) => {
+    const token = getToken(TOKEN_KEYS.ACCESS);
+
+    if (token && config.headers) {
+        config.headers.set('Authorization', `Bearer ${token}`);
+    }
+
+    return config;
+});
+
+/** Handle 401 responses with automatic token refresh */
 api.interceptors.response.use(
     (response) => response,
-    async (error) => {
-        const originalRequest = error.config;
+    async (error: AxiosError) => {
+        const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
-        if (!error.response) {
+        if (!error.response || error.response.status !== 401 || originalRequest._retry) {
             return Promise.reject(error);
         }
 
-        if (error.response.status === 401 && !originalRequest._retry) {
-
-            if (isRefreshing) {
-                return new Promise((resolve, reject) => {
-                    failedQueue.push({ resolve, reject });
-                }).then((token) => {
-                    originalRequest.headers.set("Authorization", `Bearer ${token}`);
-                    return api(originalRequest);
-                });
-            }
-
-            originalRequest._retry = true;
-            isRefreshing = true;
-
-            const refreshToken = Cookies.get("refresh_token");
-
-            try {
-                const { data } = await axios.post(
-                    `${BASE_URL}/api/v1/auth/refresh-token`,
-                    { refresh_token: refreshToken },
-                    {
-                        headers: {
-                            Authorization: `Bearer ${refreshToken}`,
-                        },
-                    }
-                );
-
-                const newAccessToken = data?.data?.access_token;
-                const newRefreshToken = data?.data?.refresh_token;
-
-                Cookies.set("access_token", newAccessToken);
-                Cookies.set("refresh_token", newRefreshToken);
-
-                api.defaults.headers.common["Authorization"] = `Bearer ${newAccessToken}`;
-
-                processQueue(null, newAccessToken);
-
-                originalRequest.headers.set("Authorization", `Bearer ${newAccessToken}`);
-
+        /** If a refresh is already in progress, queue this request */
+        if (isRefreshing) {
+            return new Promise<string>((resolve, reject) => {
+                failedQueue.push({ resolve, reject });
+            }).then((token) => {
+                originalRequest.headers.set('Authorization', `Bearer ${token}`);
                 return api(originalRequest);
-
-            } catch (err) {
-                processQueue(err, null);
-                logout();
-                return Promise.reject(err);
-            } finally {
-                isRefreshing = false;
-            }
+            });
         }
 
-        return Promise.reject(error);
-    }
+        originalRequest._retry = true;
+        isRefreshing = true;
+
+        try {
+            const newToken = await refreshAccessToken();
+
+            api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
+            processQueue(null, newToken);
+
+            originalRequest.headers.set('Authorization', `Bearer ${newToken}`);
+            return api(originalRequest);
+        } catch (refreshError) {
+            processQueue(refreshError, null);
+            logout();
+            return Promise.reject(refreshError);
+        } finally {
+            isRefreshing = false;
+        }
+    },
 );
