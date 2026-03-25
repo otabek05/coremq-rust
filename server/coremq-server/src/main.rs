@@ -10,7 +10,7 @@ mod transport;
 mod utils;
 
 use axum::{Router, routing::get};
-use std::{net::SocketAddr, sync::Arc};
+use std::{net::SocketAddr, sync::{Arc, atomic::AtomicU16}};
 use tokio::{net::TcpListener, sync::mpsc};
 
 use crate::{
@@ -71,7 +71,8 @@ async fn main() -> anyhow::Result<()> {
         jwt_service: jwt_service.clone(),
         enforcer: enforcer.clone(),
         engine: admin_tx.clone(),
-        storage: storage.clone()
+        storage: storage.clone(),
+        packet_id_counter: Arc::new(AtomicU16::new(1)),
     };
 
     let router = RouterHandler::new();

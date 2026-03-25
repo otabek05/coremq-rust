@@ -38,8 +38,13 @@ pub async fn publish_message(
     State(state): State<ApiState>,
     Json(body): Json<PublishRequest>,
 ) -> Result<Json<ApiResponse<String>>, StatusCode> {
+    let packet_id = match body.qos {
+        1 | 2 => Some(state.next_packet_id()),
+        _ => None,
+    };
+
     let packet = PublishPacket {
-        packet_id: None,
+        packet_id,
         topic: body.topic.clone(),
         payload: body.payload.into_bytes(),
         qos: body.qos,
