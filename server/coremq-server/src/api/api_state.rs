@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::sync::{Arc, atomic::{AtomicU16, Ordering}};
 
 use axum::http::StatusCode;
 use casbin::Enforcer;
@@ -13,6 +13,19 @@ pub struct ApiState {
     pub enforcer: Arc<Enforcer>,
     pub storage: Arc<Storage>,
     pub engine: mpsc::UnboundedSender<AdminCommand>,
+    pub packet_id_counter: Arc<AtomicU16>,
+}
+
+impl ApiState {
+    /// Returns the next packet ID (1–65535), wrapping around and skipping 0.
+    pub fn next_packet_id(&self) -> u16 {
+        loop {
+            let id = self.packet_id_counter.fetch_add(1, Ordering::Relaxed);
+            if id != 0 {
+                return id;
+            }
+        }
+    }
 }
 
 
